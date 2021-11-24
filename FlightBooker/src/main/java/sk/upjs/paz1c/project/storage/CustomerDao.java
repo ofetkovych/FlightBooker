@@ -3,6 +3,7 @@ package sk.upjs.paz1c.project.storage;
 import java.util.List;
 
 public interface CustomerDao {
+	
 	List<Customer> getAll();
 	
 	Customer getById(long id);
