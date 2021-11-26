@@ -2,6 +2,7 @@ package sk.upjs.paz1c.project.storage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ public class MysqlCustomerDao implements CustomerDao {
 			long id = rs.getLong("id");
 			String name = rs.getString("name");
 			String surname = rs.getString("surname");
-			String dateOfBirth = rs.getString("dateOfBirth");
+			Date dateOfBirth = rs.getDate("dateOfBirth");
 			String gender = rs.getString("gender");
 			long phoneNumber = rs.getLong("phoneNumber");
 			String adress = rs.getString("adress");
@@ -99,7 +100,7 @@ public class MysqlCustomerDao implements CustomerDao {
 			if (changed == 1) {
 				return customer;
 			} else {
-				throw new EntityNotFoundException("Student with id " + customer.getId() + " not found in DB!");
+				throw new EntityNotFoundException("Customer with id " + customer.getId() + " not found in DB!");
 			}
 		}
 	}
@@ -110,7 +111,7 @@ public class MysqlCustomerDao implements CustomerDao {
 		try {
 			jdbcTemplate.update("DELETE FROM customer WHERE id = " + idCustomer);
 		} catch (DataIntegrityViolationException e) {
-			throw new EntityUndeleteableException("Customer is a part of some attendance list, cannot be deleted", e);
+			throw new EntityUndeleteableException("Customer is a part of some flight, cannot be deleted", e);
 		}
 		return customer;
 	}

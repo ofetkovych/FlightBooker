@@ -1,12 +1,13 @@
 package sk.upjs.paz1c.project.storage;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 public class Customer {
 	private Long id;
 	private String name;
 	private String surname;
-	private String dateOfBirth;
+	private Date dateOfBirth;
 	private String gender;
 	private Long phoneNumber;
 	private String adress;
@@ -44,11 +45,11 @@ public class Customer {
 		}
 	}
 
-	public String getDateOfBirth() {
+	public Date getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	public void setDateOfBirth(String dateOfBirth) {
+	public void setDateOfBirth(Date dateOfBirth) {
 		if (dateOfBirth == null) {
 			throw new NullPointerException("Date of Birth can not be null");
 		} else {
@@ -100,7 +101,7 @@ public class Customer {
 		return name + " " + surname;
 	}
 
-	public Customer(Long id, String name, String surname, String dateOfBirth, String gender, Long phoneNumber,
+	public Customer(Long id, String name, String surname, Date dateOfBirth, String gender, Long phoneNumber,
 			String adress, long flight_id) {
 		super();
 		this.id = id;
@@ -115,7 +116,7 @@ public class Customer {
 	
 	
 	// Po vymazani nebude mat ID tak ho budeme porovnavat cez tento konstruktor
-	public Customer(String name, String surname, String dateOfBirth, String gender, Long phoneNumber, String adress,
+	public Customer(String name, String surname, Date dateOfBirth, String gender, Long phoneNumber, String adress,
 			long flight_id) {
 		super();
 		this.name = name;
@@ -125,6 +126,18 @@ public class Customer {
 		this.phoneNumber = phoneNumber;
 		this.adress = adress;
 		this.flight_id = flight_id;
+	}
+
+	public Customer(Long id, String name, String surname, Date dateOfBirth, String gender, Long phoneNumber,
+			String adress) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.dateOfBirth = dateOfBirth;
+		this.gender = gender;
+		this.phoneNumber = phoneNumber;
+		this.adress = adress;
 	}
 	
 

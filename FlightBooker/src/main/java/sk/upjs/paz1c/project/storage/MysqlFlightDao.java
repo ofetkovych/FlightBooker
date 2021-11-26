@@ -5,17 +5,20 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 public class MysqlFlightDao implements FlightDao {
 
 	private JdbcTemplate jdbcTemplate;
-	private Flight flt;
-	List<Flight> result;
+
 
 	public MysqlFlightDao(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
@@ -23,82 +26,102 @@ public class MysqlFlightDao implements FlightDao {
 
 	@Override
 	public List<Flight> getByAirport(Airport airport) {
-		String sql = "SELECT flight_id, date_of_flight, airport_from, airport_where, company_name,"
-				+ "flight_class, number_of_seats , departure, arrival, " + "FROM flight "
-				+ "LEFT JOIN flight_customer AS fc ON flight.id = fc.flight_id "
-				+ "LEFT JOIN customer ON fc.customer_id = customer.id " + "WHERE flight.airport_id = 1 "
-				+ "ORDER BY flight.id, comapany_name";
+		String sql = "select flight.id as flight_id, date_of_flight, airport_from, airport_where, company_name, flight_class, number_of_seats, departure, arrival, customer.id, customer.name, surname, date_Of_Birth, gender, phoneNumber, adress from flight\n"
+				+ "left outer join airport on airport.id = flight.airport_from\n"
+				+ "left outer join flight_customer on flight.id = flight_customer.flight_id\n"
+				+ "left outer join customer on flight_customer.flight_id = customer.id\n" + "where airport_from = 1;";
 		return jdbcTemplate.query(sql, new ResultSetExtractor<List<Flight>>() {
 
 			@Override
 			public List<Flight> extractData(ResultSet rs) throws SQLException, DataAccessException {
-				result = new ArrayList<>();
-				Flight flt = null;
+				List<Flight> list = new ArrayList<Flight>();
+				Flight flight = null;
 				while (rs.next()) {
-					long id = rs.getLong("flight_id");
-					Date flightDate = rs.getDate("date_of_flight");
-					long airportFromID = rs.getLong("airport_from");
-					long airportWhereID = rs.getLong("airport_where");
-					String companyName = rs.getString("company_name");
-					String flightClass = rs.getString("flight_class");
-					int seats = rs.getInt("number_of_seats");
-					LocalDateTime departure = rs.getTimestamp("departure").toLocalDateTime();
-					LocalDateTime arrival = rs.getTimestamp("arrival").toLocalDateTime();
-					flt = new Flight(id, flightDate, airportFromID, airportWhereID, companyName, flightClass, seats,
-							departure, arrival);
-					result.add(flt);
-					
-					
-
-				}
-				return result;
-			}
-
-		});
-	}
-
-	@Override
-	public List<Customer> getByFlight(Flight flight) {
-		String sql = "SELECT flight_id, date_of_flight, airport_from, airport_where, company_name,"
-				+ "flight_class, number_of_seats , departure, arrival, " + "FROM flight "
-				+ "LEFT JOIN flight_customer AS fc ON flight.id = fc.flight_id "
-				+ "LEFT JOIN customer ON fc.customer_id = customer.id " + "WHERE flight.airport_id = 1 "
-				+ "ORDER BY flight.id, comapany_name";
-		return jdbcTemplate.query(sql, new ResultSetExtractor<List<Customer>>() {
-
-			@Override
-			public List<Customer> extractData(ResultSet rs) throws SQLException, DataAccessException {
-				List<Customer> cust = new ArrayList<>();
-				Customer cst = null;
-				while (rs.next()) {
-					long customerId = rs.getLong("customer_id");
+					Long id = rs.getLong("flight_id");
+					if (flight == null || flight.getId() != id) {
+						Date dateOfFlight = rs.getDate("date_of_flight");
+						Long from = rs.getLong("airport_from");
+						Long where = rs.getLong("airport_where");
+						String companyName = rs.getString("company_name");
+						String flightClass = rs.getString("flight_class");
+						Integer numberOfSeats = rs.getInt("number_of_seats");
+						LocalDateTime departure = rs.getTimestamp("departure").toLocalDateTime();
+						LocalDateTime arrival = rs.getTimestamp("arrival").toLocalDateTime();
+						list.add(flight = new Flight(id, dateOfFlight, from, where, companyName, flightClass,
+								numberOfSeats, departure, arrival));
+					}
+					if (rs.getString("name") == null) {
+						continue;
+					}
+					long id_user = rs.getLong("id");
 					String name = rs.getString("name");
 					String surname = rs.getString("surname");
-					String dateOfBirth = rs.getString("date_of_birth");
+					Date dateOfBirth = rs.getDate("date_Of_Birth");
 					String gender = rs.getString("gender");
-					long phoneNumber = rs.getLong("phone_number");
+					long phoneNumber = rs.getLong("phoneNumber");
 					String adress = rs.getString("adress");
-					cst = new Customer(customerId, name, surname, dateOfBirth, gender, phoneNumber, adress,
-							flight.getId());
-					flt.getCustomers().add(cst);
-					cust.add(cst);
+					Customer cust = new Customer(id, name, surname, dateOfBirth, gender, phoneNumber, adress);
+					List<Customer> customers = flight.getCustomers();
+					customers.add(cust);
+					flight.setCustomers(customers);
 				}
-				return cust;
+				return list;
 			}
-
 		});
 	}
 
 	@Override
 	public Flight save(Flight flight) throws EntityNotFoundException, NullPointerException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		if (flight.getId() == null) { // INSERT
+			SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
+			insert.withTableName("flight");
+			insert.usingGeneratedKeyColumns("id");
+			insert.usingColumns("date_of_flight", "airport_from", "airport_where", "company_name", "flight_class", "number_of_seats", "departure", "arrival");
+			
+			Map<String, Object> values = new HashMap<>();
+			values.put("date_of_flight", flight.getDateOfFlight());
+			values.put("airport_from", flight.getFrom());
+			values.put("airport_where", flight.getWhere());
+			values.put("company_name", flight.getCompanyName());
+			values.put("flight_class", flight.getFlightClass());
+			values.put("number_of_seats", flight.getNumberOfSeats());
+			values.put("departure", flight.getDeparture());
+			values.put("arrival", flight.getArrival());
+			
+			try {
+				return new Flight(insert.executeAndReturnKey(values).longValue(), flight.getDateOfFlight(),
+						flight.getFrom(), flight.getWhere(), flight.getCompanyName(),
+						flight.getFlightClass(), flight.getNumberOfSeats(), flight.getDeparture(),
+						flight.getArrival(), flight.getCustomers());
+			} catch (DataIntegrityViolationException e) {
+				throw new EntityNotFoundException(
+						"Cannot insert flight, customer with id " + flight.getCustomers() + " not found", e);
+			}		
+		}
+		else {
+			String sql = "UPDATE flight SET date_of_flight = ?, "
+					+ "airport_from = ?, airport_where = ?, company_name = ?, flight_class = ?, number_of_seats = ?, departure = ?, "
+					+ "arrival = ? "
+					+ "WHERE id = ?";
+			int changed = jdbcTemplate.update(sql, flight.getDateOfFlight(), flight.getFrom(), flight.getWhere(),
+					flight.getCompanyName(), flight.getFlightClass(), flight.getNumberOfSeats(), flight.getDeparture(),
+					flight.getArrival(), flight.getId());
+			if (changed == 1) {
+				return flight;
+			} else {
+				throw new EntityNotFoundException("Flight with id " + flight.getId() + " not found in DB!");
+			}
+			
+		}
 	}
 
 	@Override
 	public boolean delete(long id) {
-		// TODO Auto-generated method stub
-		return false;
+		jdbcTemplate.update("DELETE FROM flight_customer WHERE flight_id = ?", id);
+		String sql = "DELETE FROM flight WHERE id = " + id; 
+		int deleted = jdbcTemplate.update(sql);
+		return deleted == 1;
 	}
 
 	@Override
