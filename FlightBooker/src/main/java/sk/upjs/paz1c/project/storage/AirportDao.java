@@ -3,8 +3,11 @@ package sk.upjs.paz1c.project.storage;
 import java.util.Set;
 
 public interface AirportDao {
+	Set<String> getByCity(String city);
 	
-	Set<Airport> getAllCountries();
+	Set<String> getAllCountries();
+	
+	Set<String> getCityByCountry();
 	
 	Airport getById(long id) throws EntityNotFoundException;
 	

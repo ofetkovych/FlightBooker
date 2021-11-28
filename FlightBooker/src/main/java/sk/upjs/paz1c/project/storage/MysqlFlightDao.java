@@ -13,6 +13,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 public class MysqlFlightDao implements FlightDao {
@@ -29,7 +30,7 @@ public class MysqlFlightDao implements FlightDao {
 		String sql = "select flight.id as flight_id, date_of_flight, airport_from, airport_where, company_name, flight_class, number_of_seats, departure, arrival, customer.id, customer.name, surname, date_Of_Birth, gender, phoneNumber, adress from flight\n"
 				+ "left outer join airport on airport.id = flight.airport_from\n"
 				+ "left outer join flight_customer on flight.id = flight_customer.flight_id\n"
-				+ "left outer join customer on flight_customer.flight_id = customer.id\n" + "where airport_from = 1;";
+				+ "left outer join customer on flight_customer.flight_id = customer.id\n" + "where airport_from = " + airport.getId() +";";
 		return jdbcTemplate.query(sql, new ResultSetExtractor<List<Flight>>() {
 
 			@Override
@@ -126,8 +127,23 @@ public class MysqlFlightDao implements FlightDao {
 
 	@Override
 	public boolean isFull(Flight flight) {
-		// TODO Auto-generated method stub
-		return false;
+		String sql = "select number_of_seats-count(customer_id) as volne from flight_customer "
+				+ "join flight on flight.id = flight_customer.flight_id " + "where flight_id = " + flight.getId() + " group by flight_id; ";
+		int count = jdbcTemplate.queryForObject(sql, new RowMapper<Integer>() {
+
+			@Override
+			public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
+				int volne = rs.getInt("volne");
+				return volne;
+			}
+			
+		});
+		if(count == flight.getNumberOfSeats()) {
+			throw new FlightFullException("Flight is full!" );
+		}
+		else {
+			return false;
+		}
 	}
 
 }
