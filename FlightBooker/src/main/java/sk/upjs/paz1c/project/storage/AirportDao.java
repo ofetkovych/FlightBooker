@@ -7,7 +7,7 @@ public interface AirportDao {
 	
 	Set<String> getAllCountries();
 	
-	Set<String> getCityByCountry();
+	Set<String> getCityByCountry(String country);
 	
 	Airport getById(long id) throws EntityNotFoundException;
 	

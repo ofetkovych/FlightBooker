@@ -20,7 +20,6 @@ public class MysqlFlightDao implements FlightDao {
 
 	private JdbcTemplate jdbcTemplate;
 
-
 	public MysqlFlightDao(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
 	}
@@ -30,7 +29,8 @@ public class MysqlFlightDao implements FlightDao {
 		String sql = "select flight.id as flight_id, date_of_flight, airport_from, airport_where, company_name, flight_class, number_of_seats, departure, arrival, customer.id, customer.name, surname, date_Of_Birth, gender, phoneNumber, adress from flight\n"
 				+ "left outer join airport on airport.id = flight.airport_from\n"
 				+ "left outer join flight_customer on flight.id = flight_customer.flight_id\n"
-				+ "left outer join customer on flight_customer.flight_id = customer.id\n" + "where airport_from = " + airport.getId() +";";
+				+ "left outer join customer on flight_customer.flight_id = customer.id\n" + "where airport_from = "
+				+ airport.getId() + ";";
 		return jdbcTemplate.query(sql, new ResultSetExtractor<List<Flight>>() {
 
 			@Override
@@ -73,13 +73,14 @@ public class MysqlFlightDao implements FlightDao {
 
 	@Override
 	public Flight save(Flight flight) throws EntityNotFoundException, NullPointerException {
-		
+
 		if (flight.getId() == null) { // INSERT
 			SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
 			insert.withTableName("flight");
 			insert.usingGeneratedKeyColumns("id");
-			insert.usingColumns("date_of_flight", "airport_from", "airport_where", "company_name", "flight_class", "number_of_seats", "departure", "arrival");
-			
+			insert.usingColumns("date_of_flight", "airport_from", "airport_where", "company_name", "flight_class",
+					"number_of_seats", "departure", "arrival");
+
 			Map<String, Object> values = new HashMap<>();
 			values.put("date_of_flight", flight.getDateOfFlight());
 			values.put("airport_from", flight.getFrom());
@@ -89,22 +90,19 @@ public class MysqlFlightDao implements FlightDao {
 			values.put("number_of_seats", flight.getNumberOfSeats());
 			values.put("departure", flight.getDeparture());
 			values.put("arrival", flight.getArrival());
-			
+
 			try {
 				return new Flight(insert.executeAndReturnKey(values).longValue(), flight.getDateOfFlight(),
-						flight.getFrom(), flight.getWhere(), flight.getCompanyName(),
-						flight.getFlightClass(), flight.getNumberOfSeats(), flight.getDeparture(),
-						flight.getArrival(), flight.getCustomers());
+						flight.getFrom(), flight.getWhere(), flight.getCompanyName(), flight.getFlightClass(),
+						flight.getNumberOfSeats(), flight.getDeparture(), flight.getArrival(), flight.getCustomers());
 			} catch (DataIntegrityViolationException e) {
 				throw new EntityNotFoundException(
 						"Cannot insert flight, customer with id " + flight.getCustomers() + " not found", e);
-			}		
-		}
-		else {
+			}
+		} else {
 			String sql = "UPDATE flight SET date_of_flight = ?, "
 					+ "airport_from = ?, airport_where = ?, company_name = ?, flight_class = ?, number_of_seats = ?, departure = ?, "
-					+ "arrival = ? "
-					+ "WHERE id = ?";
+					+ "arrival = ? " + "WHERE id = ?";
 			int changed = jdbcTemplate.update(sql, flight.getDateOfFlight(), flight.getFrom(), flight.getWhere(),
 					flight.getCompanyName(), flight.getFlightClass(), flight.getNumberOfSeats(), flight.getDeparture(),
 					flight.getArrival(), flight.getId());
@@ -113,14 +111,14 @@ public class MysqlFlightDao implements FlightDao {
 			} else {
 				throw new EntityNotFoundException("Flight with id " + flight.getId() + " not found in DB!");
 			}
-			
+
 		}
 	}
 
 	@Override
 	public boolean delete(long id) {
 		jdbcTemplate.update("DELETE FROM flight_customer WHERE flight_id = ?", id);
-		String sql = "DELETE FROM flight WHERE id = " + id; 
+		String sql = "DELETE FROM flight WHERE id = " + id;
 		int deleted = jdbcTemplate.update(sql);
 		return deleted == 1;
 	}
@@ -128,7 +126,8 @@ public class MysqlFlightDao implements FlightDao {
 	@Override
 	public boolean isFull(Flight flight) {
 		String sql = "select number_of_seats-count(customer_id) as volne from flight_customer "
-				+ "join flight on flight.id = flight_customer.flight_id " + "where flight_id = " + flight.getId() + " group by flight_id; ";
+				+ "join flight on flight.id = flight_customer.flight_id " + "where flight_id = " + flight.getId()
+				+ " group by flight_id; ";
 		int count = jdbcTemplate.queryForObject(sql, new RowMapper<Integer>() {
 
 			@Override
@@ -136,14 +135,44 @@ public class MysqlFlightDao implements FlightDao {
 				int volne = rs.getInt("volne");
 				return volne;
 			}
-			
+
 		});
-		if(count == flight.getNumberOfSeats()) {
-			throw new FlightFullException("Flight is full!" );
-		}
-		else {
+		if (count == flight.getNumberOfSeats()) {
+			throw new FlightFullException("Flight is full!");
+		} else {
 			return false;
 		}
 	}
 
+	@Override
+	public List<List<String>> fromAtoB(Flight from, Flight where) {
+	     String sql = "SELECT a1.airport_name as a111, a2.airport_name as a222\r\n" + 
+                 "FROM Flight AS f\r\n" + 
+                 "INNER JOIN Airport AS a1\r\n" + 
+                 "ON f.airport_from = a1.id\r\n" + 
+                 "INNER JOIN Airport AS a2\r\n" + 
+                 "ON f.airport_where = a2.id\r\n" +
+                 "WHERE airport_from = " + from.getId() + " AND airport_where = " +
+                 where.getId();
+         List<List<String>> flights = jdbcTemplate.query(sql, new RowMapper<List<String>>() {
+
+             @Override
+             public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                 List<String> AtoB = new ArrayList<>();
+                 String airportFrom = rs.getString("a111");
+                 String airportWhere = rs.getString("a222");
+                 AtoB.add(airportFrom);
+                 AtoB.add(airportWhere);
+                 return AtoB;
+             }
+
+         });
+         return flights;
+	}
+
+	@Override
+	public List<List<String>> fromAtoC(Flight from, Flight where) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
