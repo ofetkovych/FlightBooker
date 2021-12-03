@@ -1,17 +1,16 @@
 package sk.upjs.paz1c.project.storage;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Date;
 
 public class Customer {
 	private Long id;
 	private String name;
 	private String surname;
-	private Date dateOfBirth;
+	private LocalDate dateOfBirth;
 	private String gender;
 	private Long phoneNumber;
 	private String adress;
-	private long flight_id;
 
 	public Long getId() {
 		return id;
@@ -45,11 +44,11 @@ public class Customer {
 		}
 	}
 
-	public Date getDateOfBirth() {
+	public LocalDate getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	public void setDateOfBirth(Date dateOfBirth) {
+	public void setDateOfBirth(LocalDate dateOfBirth) {
 		if (dateOfBirth == null) {
 			throw new NullPointerException("Date of Birth can not be null");
 		} else {
@@ -89,35 +88,13 @@ public class Customer {
 		}
 	}
 
-	public long getFlight_id() {
-		return flight_id;
-	}
-
-	public void setFlight_id(long flight_id) {
-		this.flight_id = flight_id;
-	}
 	
 	public String toString() {
 		return name + " " + surname;
 	}
 
-	public Customer(Long id, String name, String surname, Date dateOfBirth, String gender, Long phoneNumber,
-			String adress, long flight_id) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.surname = surname;
-		this.dateOfBirth = dateOfBirth;
-		this.gender = gender;
-		this.phoneNumber = phoneNumber;
-		this.adress = adress;
-		this.flight_id = flight_id;
-	}
-	
-	
 	// Po vymazani nebude mat ID tak ho budeme porovnavat cez tento konstruktor
-	public Customer(String name, String surname, Date dateOfBirth, String gender, Long phoneNumber, String adress,
-			long flight_id) {
+	public Customer(String name, String surname, LocalDate dateOfBirth, String gender, Long phoneNumber, String adress) {
 		super();
 		this.name = name;
 		this.surname = surname;
@@ -125,10 +102,9 @@ public class Customer {
 		this.gender = gender;
 		this.phoneNumber = phoneNumber;
 		this.adress = adress;
-		this.flight_id = flight_id;
 	}
 
-	public Customer(Long id, String name, String surname, Date dateOfBirth, String gender, Long phoneNumber,
+	public Customer(Long id, String name, String surname, LocalDate dateOfBirth, String gender, Long phoneNumber,
 			String adress) {
 		super();
 		this.id = id;
@@ -139,6 +115,7 @@ public class Customer {
 		this.phoneNumber = phoneNumber;
 		this.adress = adress;
 	}
+	
 	
 
 }

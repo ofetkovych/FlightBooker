@@ -1,7 +1,11 @@
 package sk.upjs.paz1c.project.storage;
 
+
 import java.sql.ResultSet;
+
+
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -33,24 +37,23 @@ public class MysqlCustomerDao implements CustomerDao {
 			long id = rs.getLong("id");
 			String name = rs.getString("name");
 			String surname = rs.getString("surname");
-			Date dateOfBirth = rs.getDate("dateOfBirth");
+			LocalDate dateOfBirth = rs.getDate("date_Of_Birth").toLocalDate();
 			String gender = rs.getString("gender");
 			long phoneNumber = rs.getLong("phoneNumber");
 			String adress = rs.getString("adress");
-			long flight_id = rs.getLong("flight_id");
-			return new Customer(id, name, surname, dateOfBirth, gender, phoneNumber, adress, flight_id);
+			return new Customer(id, name, surname, dateOfBirth, gender, phoneNumber, adress);
 		}
 	}
 
 	@Override
 	public List<Customer> getAll() {
-		String sql = "SELECT id, name, surname, date_Of_Birth, gender, phoneNumber, adress, flight_id FROM customer";
+		String sql = "SELECT id, name, surname, date_Of_Birth, gender, phoneNumber, adress FROM customer";
 		return jdbcTemplate.query(sql, new CustomerRowMapper());
 	}
 
 	@Override
 	public Customer getById(long id) {
-		String sql = "SELECT id, name, surname, date_Of_Birth, gender, phoneNumber, adress, flight_id FROM customer WHERE id = ?";
+		String sql = "SELECT id, name, surname, date_Of_Birth, gender, phoneNumber, adress FROM customer WHERE id = " + id;
 		try {
 			return jdbcTemplate.queryForObject(sql, new CustomerRowMapper(), id);
 		} catch (EmptyResultDataAccessException e) {
@@ -60,7 +63,9 @@ public class MysqlCustomerDao implements CustomerDao {
 
 	@Override
 	public List<Customer> getByFlightId(long flight_id) {
-		String sql = "SELECT id, name, surname, date_Of_Birth, gender, phoneNumber, adress, flight_id FROM customer WHERE flight_id = "
+		String sql = "SELECT c.id, c.name, c.surname , c.date_Of_Birth, c.gender, c.phoneNumber, c.adress from flight_customer fc\n"
+				+ "	JOIN customer c ON fc.customer_id = c.id\n"
+				+ "		WHERE fc.flight_id = "
 				+ flight_id;
 		return jdbcTemplate.query(sql, new CustomerRowMapper());
 	}
@@ -71,31 +76,26 @@ public class MysqlCustomerDao implements CustomerDao {
 			SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
 			insert.withTableName("customer");
 			insert.usingGeneratedKeyColumns("id");
-			insert.usingColumns("name", "surname", "dateOfBirth", "gender", "phoneNumber", "adress", "flight_id");
+			insert.usingColumns("name", "surname", "date_Of_Birth", "gender", "phoneNumber", "adress");
 
 			Map<String, Object> values = new HashMap<>();
 			values.put("name", customer.getName());
 			values.put("surname", customer.getSurname());
-			values.put("dateOfBirth", customer.getDateOfBirth());
+			values.put("date_Of_Birth", customer.getDateOfBirth());
 			values.put("gender", customer.getGender());
 			values.put("phoneNumber", customer.getPhoneNumber());
 			values.put("adress", customer.getAdress());
-			values.put("flight_id", customer.getFlight_id());
 
-			try {
-				return new Customer(insert.executeAndReturnKey(values).longValue(), customer.getName(),
-						customer.getSurname(), customer.getDateOfBirth(), customer.getGender(),
-						customer.getPhoneNumber(), customer.getAdress(), customer.getFlight_id());
-			} catch (DataIntegrityViolationException e) {
-				throw new EntityNotFoundException(
-						"Cannot insert customer, flight with id " + customer.getFlight_id() + " not found", e);
-			}
+			return new Customer(insert.executeAndReturnKey(values).longValue(), customer.getName(),
+					customer.getSurname(), customer.getDateOfBirth(), customer.getGender(),
+					customer.getPhoneNumber(), customer.getAdress());
+				
 		} else { // UPDATE
 			String sql = "UPDATE customer SET name = ?, "
-					+ "surname = ?, dateOfBirth = ?, gender = ?, phoneNumber = ?, adress = ?, flight_id = ?"
+					+ "surname = ?, date_Of_Birth = ?, gender = ?, phoneNumber = ?, adress = ? "
 					+ "WHERE id = ?";
 			int changed = jdbcTemplate.update(sql, customer.getName(), customer.getSurname(), customer.getDateOfBirth(),
-					customer.getGender(), customer.getPhoneNumber(), customer.getAdress(), customer.getFlight_id(),
+					customer.getGender(), customer.getPhoneNumber(), customer.getAdress(),
 					customer.getId());
 			if (changed == 1) {
 				return customer;

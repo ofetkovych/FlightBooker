@@ -1,7 +1,10 @@
 package sk.upjs.paz1c.project.storage;
 
+
 import java.sql.ResultSet;
+
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,7 +60,7 @@ public class MysqlFlightDao implements FlightDao {
 					long id_user = rs.getLong("id");
 					String name = rs.getString("name");
 					String surname = rs.getString("surname");
-					Date dateOfBirth = rs.getDate("date_Of_Birth");
+					LocalDate dateOfBirth = rs.getDate("date_Of_Birth").toLocalDate();
 					String gender = rs.getString("gender");
 					long phoneNumber = rs.getLong("phoneNumber");
 					String adress = rs.getString("adress");
@@ -172,7 +175,48 @@ public class MysqlFlightDao implements FlightDao {
 
 	@Override
 	public List<List<String>> fromAtoC(Flight from, Flight where) {
-		// TODO Auto-generated method stub
-		return null;
+		 String sql = " WITH JoinedFlights AS (\n"
+		 		+ "  SELECT\n"
+		 		+ "    f.id as id,\n"
+		 		+ "    a1.id as origin,\n"
+		 		+ "    a2.id as target,\n"
+		 		+ "    f.departure as departure,\n"
+		 		+ "    f.arrival as arrival\n"
+		 		+ "  FROM Flight AS f\n"
+		 		+ "  INNER JOIN Airport AS a1\n"
+		 		+ "  ON f.airport_from = a1.id\n"
+		 		+ "  INNER JOIN Airport AS a2\n"
+		 		+ "  ON f.airport_where = a2.id\n"
+		 		+ ")\n"
+		 		+ "SELECT DISTINCT\n"
+		 		+ "  f1.id as firstFlightId,\n"
+		 		+ "  f2.id as secondFlightId\n"
+		 		+ "FROM\n"
+		 		+ "  JoinedFlights f1\n"
+		 		+ "INNER JOIN\n"
+		 		+ "  JoinedFlights f2\n"
+		 		+ "ON\n"
+		 		+ "  f1.arrival < f2.departure\n"
+		 		+ "WHERE\n"
+		 		+ "  (f1.origin = 4 AND f1.target = 3) AND (f2.origin = 3 AND f2.target = 1 )\n"
+		 		+ "GROUP BY f1.id, f2.id\n"
+		 		+ "ORDER BY TIMESTAMPDIFF(SECOND, f1.arrival, f2.departure)";
+		 		
+         List<List<String>> flightsAtoC = jdbcTemplate.query(sql, new RowMapper<List<String>>() {
+
+             @Override
+             public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+                 List<String> AtoB = new ArrayList<>();
+                 String airportFrom = rs.getString("a111");
+                 String through = rs.getString("");
+                 String airportWhere = rs.getString("a222");
+                 AtoB.add(airportFrom);
+                 AtoB.add(through);
+                 AtoB.add(airportWhere);
+                 return AtoB;
+             }
+
+         });
+         return flightsAtoC;
 	}
 }
