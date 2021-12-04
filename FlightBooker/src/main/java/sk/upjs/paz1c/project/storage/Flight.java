@@ -1,5 +1,6 @@
 package sk.upjs.paz1c.project.storage;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -7,7 +8,7 @@ import java.util.List;
 
 public class Flight {
     private Long id;
-    private Date dateOfFlight;
+    private LocalDate dateOfFlight;
     private Long from;
     private Long where;
     private String companyName;
@@ -17,7 +18,7 @@ public class Flight {
     private LocalDateTime arrival;
     private List<Customer> customers;
     
-	public Flight(Long id, Date dateOfFlight, Long from, Long where, String companyName, String flightClass,
+	public Flight(Long id, LocalDate dateOfFlight, Long from, Long where, String companyName, String flightClass,
 			Integer numberOfSeats, LocalDateTime departure, LocalDateTime arrival) {
 		super();
 		this.id = id;
@@ -31,7 +32,7 @@ public class Flight {
 		this.arrival = arrival;
 	}
 
-	public Flight(Long id, Date dateOfFlight, Long from, Long where, String companyName, String flightClass,
+	public Flight(Long id, LocalDate dateOfFlight, Long from, Long where, String companyName, String flightClass,
 			Integer numberOfSeats, LocalDateTime departure, LocalDateTime arrival, List<Customer> customers) {
 		super();
 		this.id = id;
@@ -54,11 +55,11 @@ public class Flight {
 		this.id = id;
 	}
 
-	public Date getDateOfFlight() {
+	public LocalDate getDateOfFlight() {
 		return dateOfFlight;
 	}
 
-	public void setDateOfFlight(Date dateOfFlight) {
+	public void setDateOfFlight(LocalDate dateOfFlight) {
 		this.dateOfFlight = dateOfFlight;
 	}
 

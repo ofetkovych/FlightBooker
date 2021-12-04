@@ -1,6 +1,5 @@
 package sk.upjs.paz1c.project.storage;
 
-
 import java.sql.ResultSet;
 
 import java.sql.SQLException;
@@ -43,7 +42,7 @@ public class MysqlFlightDao implements FlightDao {
 				while (rs.next()) {
 					Long id = rs.getLong("flight_id");
 					if (flight == null || flight.getId() != id) {
-						Date dateOfFlight = rs.getDate("date_of_flight");
+						LocalDate dateOfFlight = rs.getDate("date_of_flight").toLocalDate();
 						Long from = rs.getLong("airport_from");
 						Long where = rs.getLong("airport_where");
 						String companyName = rs.getString("company_name");
@@ -76,46 +75,76 @@ public class MysqlFlightDao implements FlightDao {
 
 	@Override
 	public Flight save(Flight flight) throws EntityNotFoundException, NullPointerException {
+		boolean saved = true;
+		Flight savedFlight = null;
+		if (flight == null) {
+			throw new NullPointerException("Flight cannot be null");
+		}
 
-		if (flight.getId() == null) { // INSERT
-			SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
-			insert.withTableName("flight");
-			insert.usingGeneratedKeyColumns("id");
-			insert.usingColumns("date_of_flight", "airport_from", "airport_where", "company_name", "flight_class",
-					"number_of_seats", "departure", "arrival");
+		for (Customer customer : flight.getCustomers()) {
+			if (customer.getId() == null) {
+				throw new NullPointerException("Student has no ID: " + customer);
+			}
 
-			Map<String, Object> values = new HashMap<>();
-			values.put("date_of_flight", flight.getDateOfFlight());
-			values.put("airport_from", flight.getFrom());
-			values.put("airport_where", flight.getWhere());
-			values.put("company_name", flight.getCompanyName());
-			values.put("flight_class", flight.getFlightClass());
-			values.put("number_of_seats", flight.getNumberOfSeats());
-			values.put("departure", flight.getDeparture());
-			values.put("arrival", flight.getArrival());
+			if (flight.getId() == null) { // INSERT
+				SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
+				insert.withTableName("flight");
+				insert.usingGeneratedKeyColumns("id");
+				insert.usingColumns("date_of_flight", "airport_from", "airport_where", "company_name", "flight_class",
+						"number_of_seats", "departure", "arrival");
 
-			try {
-				return new Flight(insert.executeAndReturnKey(values).longValue(), flight.getDateOfFlight(),
+				Map<String, Object> values = new HashMap<>();
+				values.put("date_of_flight", flight.getDateOfFlight());
+				values.put("airport_from", flight.getFrom());
+				values.put("airport_where", flight.getWhere());
+				values.put("company_name", flight.getCompanyName());
+				values.put("flight_class", flight.getFlightClass());
+				values.put("number_of_seats", flight.getNumberOfSeats());
+				values.put("departure", flight.getDeparture());
+				values.put("arrival", flight.getArrival());
+
+				savedFlight = new Flight(insert.executeAndReturnKey(values).longValue(), flight.getDateOfFlight(),
 						flight.getFrom(), flight.getWhere(), flight.getCompanyName(), flight.getFlightClass(),
 						flight.getNumberOfSeats(), flight.getDeparture(), flight.getArrival(), flight.getCustomers());
-			} catch (DataIntegrityViolationException e) {
-				throw new EntityNotFoundException(
-						"Cannot insert flight, customer with id " + flight.getCustomers() + " not found", e);
-			}
-		} else {
-			String sql = "UPDATE flight SET date_of_flight = ?, "
-					+ "airport_from = ?, airport_where = ?, company_name = ?, flight_class = ?, number_of_seats = ?, departure = ?, "
-					+ "arrival = ? " + "WHERE id = ?";
-			int changed = jdbcTemplate.update(sql, flight.getDateOfFlight(), flight.getFrom(), flight.getWhere(),
-					flight.getCompanyName(), flight.getFlightClass(), flight.getNumberOfSeats(), flight.getDeparture(),
-					flight.getArrival(), flight.getId());
-			if (changed == 1) {
-				return flight;
-			} else {
-				throw new EntityNotFoundException("Flight with id " + flight.getId() + " not found in DB!");
-			}
+				insertFlight(flight.getCustomers(), flight.getId());
+				saved = true;
+				return savedFlight;
 
+			} else {
+				String sql = "UPDATE flight SET date_of_flight = ?, "
+						+ "airport_from = ?, airport_where = ?, company_name = ?, flight_class = ?, number_of_seats = ?, departure = ?, "
+						+ "arrival = ? " + "WHERE id = ?";
+				int changed = jdbcTemplate.update(sql, flight.getDateOfFlight(), flight.getFrom(), flight.getWhere(),
+						flight.getCompanyName(), flight.getFlightClass(), flight.getNumberOfSeats(),
+						flight.getDeparture(), flight.getArrival(), flight.getId());
+				if (changed == 0) {
+					throw new EntityNotFoundException("Flight with id: " + flight.getId() + " not found!");
+				}
+				jdbcTemplate.update("DELETE FROM flight_customer WHERE flight_id = ?", flight.getId());
+				insertFlight(flight.getCustomers(), flight.getId());
+				saved = false;
+				return flight;
+
+			}
 		}
+		if (saved) {
+			return savedFlight;
+		} else {
+			return flight;
+		}
+	}
+
+	private void insertFlight(List<Customer> customers, long flightId) {
+		if (customers == null || customers.size() == 0) {
+			return;
+		}
+		StringBuilder sb = new StringBuilder();
+		sb.append("INSERT INTO student_attendance (attendance_id, student_id) VALUES ");
+		for (Customer customer : customers) {
+			sb.append('(').append(flightId).append(',').append(customer.getId()).append("),");
+		}
+		String sql = sb.substring(0, sb.length() - 1);
+		jdbcTemplate.update(sql);
 	}
 
 	@Override
@@ -149,74 +178,52 @@ public class MysqlFlightDao implements FlightDao {
 
 	@Override
 	public List<List<String>> fromAtoB(Flight from, Flight where) {
-	     String sql = "SELECT a1.airport_name as a111, a2.airport_name as a222\r\n" + 
-                 "FROM Flight AS f\r\n" + 
-                 "INNER JOIN Airport AS a1\r\n" + 
-                 "ON f.airport_from = a1.id\r\n" + 
-                 "INNER JOIN Airport AS a2\r\n" + 
-                 "ON f.airport_where = a2.id\r\n" +
-                 "WHERE airport_from = " + from.getId() + " AND airport_where = " +
-                 where.getId();
-         List<List<String>> flights = jdbcTemplate.query(sql, new RowMapper<List<String>>() {
+		String sql = "SELECT a1.airport_name as a111, a2.airport_name as a222\r\n" + "FROM Flight AS f\r\n"
+				+ "INNER JOIN Airport AS a1\r\n" + "ON f.airport_from = a1.id\r\n" + "INNER JOIN Airport AS a2\r\n"
+				+ "ON f.airport_where = a2.id\r\n" + "WHERE airport_from = " + from.getId() + " AND airport_where = "
+				+ where.getId();
+		List<List<String>> flights = jdbcTemplate.query(sql, new RowMapper<List<String>>() {
 
-             @Override
-             public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                 List<String> AtoB = new ArrayList<>();
-                 String airportFrom = rs.getString("a111");
-                 String airportWhere = rs.getString("a222");
-                 AtoB.add(airportFrom);
-                 AtoB.add(airportWhere);
-                 return AtoB;
-             }
+			@Override
+			public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+				List<String> AtoB = new ArrayList<>();
+				String airportFrom = rs.getString("a111");
+				String airportWhere = rs.getString("a222");
+				AtoB.add(airportFrom);
+				AtoB.add(airportWhere);
+				return AtoB;
+			}
 
-         });
-         return flights;
+		});
+		return flights;
 	}
 
 	@Override
 	public List<List<String>> fromAtoC(Flight from, Flight where) {
-		 String sql = " WITH JoinedFlights AS (\n"
-		 		+ "  SELECT\n"
-		 		+ "    f.id as id,\n"
-		 		+ "    a1.id as origin,\n"
-		 		+ "    a2.id as target,\n"
-		 		+ "    f.departure as departure,\n"
-		 		+ "    f.arrival as arrival\n"
-		 		+ "  FROM Flight AS f\n"
-		 		+ "  INNER JOIN Airport AS a1\n"
-		 		+ "  ON f.airport_from = a1.id\n"
-		 		+ "  INNER JOIN Airport AS a2\n"
-		 		+ "  ON f.airport_where = a2.id\n"
-		 		+ ")\n"
-		 		+ "SELECT DISTINCT\n"
-		 		+ "  f1.id as firstFlightId,\n"
-		 		+ "  f2.id as secondFlightId\n"
-		 		+ "FROM\n"
-		 		+ "  JoinedFlights f1\n"
-		 		+ "INNER JOIN\n"
-		 		+ "  JoinedFlights f2\n"
-		 		+ "ON\n"
-		 		+ "  f1.arrival < f2.departure\n"
-		 		+ "WHERE\n"
-		 		+ "  (f1.origin = 4 AND f1.target = 3) AND (f2.origin = 3 AND f2.target = 1 )\n"
-		 		+ "GROUP BY f1.id, f2.id\n"
-		 		+ "ORDER BY TIMESTAMPDIFF(SECOND, f1.arrival, f2.departure)";
-		 		
-         List<List<String>> flightsAtoC = jdbcTemplate.query(sql, new RowMapper<List<String>>() {
+		String sql = " WITH JoinedFlights AS (\n" + "  SELECT\n" + "    f.id as id,\n" + "    a1.id as origin,\n"
+				+ "    a2.id as target,\n" + "    f.departure as departure,\n" + "    f.arrival as arrival\n"
+				+ "  FROM Flight AS f\n" + "  INNER JOIN Airport AS a1\n" + "  ON f.airport_from = a1.id\n"
+				+ "  INNER JOIN Airport AS a2\n" + "  ON f.airport_where = a2.id\n" + ")\n" + "SELECT DISTINCT\n"
+				+ "  f1.id as firstFlightId,\n" + "  f2.id as secondFlightId\n" + "FROM\n" + "  JoinedFlights f1\n"
+				+ "INNER JOIN\n" + "  JoinedFlights f2\n" + "ON\n" + "  f1.arrival < f2.departure\n" + "WHERE\n"
+				+ "  (f1.origin = 4 AND f1.target = 3) AND (f2.origin = 3 AND f2.target = 1 )\n"
+				+ "GROUP BY f1.id, f2.id\n" + "ORDER BY TIMESTAMPDIFF(SECOND, f1.arrival, f2.departure)";
 
-             @Override
-             public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-                 List<String> AtoB = new ArrayList<>();
-                 String airportFrom = rs.getString("a111");
-                 String through = rs.getString("");
-                 String airportWhere = rs.getString("a222");
-                 AtoB.add(airportFrom);
-                 AtoB.add(through);
-                 AtoB.add(airportWhere);
-                 return AtoB;
-             }
+		List<List<String>> flightsAtoC = jdbcTemplate.query(sql, new RowMapper<List<String>>() {
 
-         });
-         return flightsAtoC;
+			@Override
+			public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+				List<String> AtoB = new ArrayList<>();
+				String airportFrom = rs.getString("a111");
+				String through = rs.getString("");
+				String airportWhere = rs.getString("a222");
+				AtoB.add(airportFrom);
+				AtoB.add(through);
+				AtoB.add(airportWhere);
+				return AtoB;
+			}
+
+		});
+		return flightsAtoC;
 	}
 }

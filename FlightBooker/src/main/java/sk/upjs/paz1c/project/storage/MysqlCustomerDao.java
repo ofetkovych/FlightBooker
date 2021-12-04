@@ -55,9 +55,9 @@ public class MysqlCustomerDao implements CustomerDao {
 	public Customer getById(long id) {
 		String sql = "SELECT id, name, surname, date_Of_Birth, gender, phoneNumber, adress FROM customer WHERE id = " + id;
 		try {
-			return jdbcTemplate.queryForObject(sql, new CustomerRowMapper(), id);
+			return jdbcTemplate.queryForObject(sql, new CustomerRowMapper());
 		} catch (EmptyResultDataAccessException e) {
-			throw new EntityNotFoundException("Customer with id" + id + "was not found in Database", e);
+			throw new EntityNotFoundException("Customer with id " + id + " was not found in Database", e);
 		}
 	}
 
@@ -106,7 +106,7 @@ public class MysqlCustomerDao implements CustomerDao {
 	}
 
 	@Override
-	public Customer delete(long idCustomer) throws EntityNotFoundException, EntityUndeleteableException {
+	public Customer delete(long idCustomer) throws  EntityUndeleteableException {
 		Customer customer = getById(idCustomer);
 		try {
 			jdbcTemplate.update("DELETE FROM customer WHERE id = " + idCustomer);
