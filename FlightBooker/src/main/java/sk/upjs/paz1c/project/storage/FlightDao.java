@@ -10,7 +10,7 @@ public interface FlightDao {
 	
 	List<Flight> getByAirport(Airport airport);
 	
-	Flight save(Flight flight) throws EntityNotFoundException, NullPointerException;
+	Flight save(Flight flight) throws EntityNotFoundException;
 	
 	boolean delete(long id);
 	

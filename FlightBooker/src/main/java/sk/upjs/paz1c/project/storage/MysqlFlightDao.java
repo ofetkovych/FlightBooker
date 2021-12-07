@@ -75,73 +75,75 @@ public class MysqlFlightDao implements FlightDao {
 
 	@Override
 	public Flight save(Flight flight) throws EntityNotFoundException, NullPointerException {
-		boolean saved = true;
-		Flight savedFlight = null;
 		if (flight == null) {
 			throw new NullPointerException("Flight cannot be null");
 		}
-
-		for (Customer customer : flight.getCustomers()) {
+		for (Customer customer: flight.getCustomers()) {
 			if (customer.getId() == null) {
-				throw new NullPointerException("Student has no ID: " + customer);
-			}
-
-			if (flight.getId() == null) { // INSERT
-				SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
-				insert.withTableName("flight");
-				insert.usingGeneratedKeyColumns("id");
-				insert.usingColumns("date_of_flight", "airport_from", "airport_where", "company_name", "flight_class",
-						"number_of_seats", "departure", "arrival");
-
-				Map<String, Object> values = new HashMap<>();
-				values.put("date_of_flight", flight.getDateOfFlight());
-				values.put("airport_from", flight.getFrom());
-				values.put("airport_where", flight.getWhere());
-				values.put("company_name", flight.getCompanyName());
-				values.put("flight_class", flight.getFlightClass());
-				values.put("number_of_seats", flight.getNumberOfSeats());
-				values.put("departure", flight.getDeparture());
-				values.put("arrival", flight.getArrival());
-
-				savedFlight = new Flight(insert.executeAndReturnKey(values).longValue(), flight.getDateOfFlight(),
-						flight.getFrom(), flight.getWhere(), flight.getCompanyName(), flight.getFlightClass(),
-						flight.getNumberOfSeats(), flight.getDeparture(), flight.getArrival(), flight.getCustomers());
-				insertFlight(flight.getCustomers(), flight.getId());
-				saved = true;
-				return savedFlight;
-
-			} else {
-				String sql = "UPDATE flight SET date_of_flight = ?, "
-						+ "airport_from = ?, airport_where = ?, company_name = ?, flight_class = ?, number_of_seats = ?, departure = ?, "
-						+ "arrival = ? " + "WHERE id = ?";
-				int changed = jdbcTemplate.update(sql, flight.getDateOfFlight(), flight.getFrom(), flight.getWhere(),
-						flight.getCompanyName(), flight.getFlightClass(), flight.getNumberOfSeats(),
-						flight.getDeparture(), flight.getArrival(), flight.getId());
-				if (changed == 0) {
-					throw new EntityNotFoundException("Flight with id: " + flight.getId() + " not found!");
-				}
-				jdbcTemplate.update("DELETE FROM flight_customer WHERE flight_id = ?", flight.getId());
-				insertFlight(flight.getCustomers(), flight.getId());
-				saved = false;
-				return flight;
-
+				throw new NullPointerException("Customer has no ID: " + customer);
 			}
 		}
-		if (saved) {
-			return savedFlight;
+
+		if (flight.getId() == null) { // INSERT
+			SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
+			insert.withTableName("flight");
+			insert.usingGeneratedKeyColumns("id");
+			insert.usingColumns("date_of_flight", "airport_from", "airport_where", "company_name", "flight_class",
+					"number_of_seats", "departure", "arrival");
+
+			Map<String, Object> values = new HashMap<>();
+			values.put("date_of_flight", flight.getDateOfFlight());
+			values.put("airport_from", flight.getFrom());
+			values.put("airport_where", flight.getWhere());
+			values.put("company_name", flight.getCompanyName());
+			values.put("flight_class", flight.getFlightClass());
+			values.put("number_of_seats", flight.getNumberOfSeats());
+			values.put("departure", flight.getDeparture());
+			values.put("arrival", flight.getArrival());
+
+			try {
+				Long idinsert = insert.executeAndReturnKey(values).longValue();
+				flight.setId(idinsert);
+				insertCustomers(flight.getCustomers(), idinsert);
+				return flight;
+			} catch (DataIntegrityViolationException e) {
+				throw new EntityNotFoundException(
+						"Cannot insert flight, customer with id " + flight.getCustomers() + " not found", e);
+			}
 		} else {
+			String sql = "UPDATE flight SET date_of_flight = ?, "
+					+ "airport_from = ?, airport_where = ?, company_name = ?, flight_class = ?, number_of_seats = ?, departure = ?, "
+					+ "arrival = ? " + "WHERE id = ?";
+			int changed = jdbcTemplate.update(sql, flight.getDateOfFlight(), flight.getFrom(), flight.getWhere(),
+					flight.getCompanyName(), flight.getFlightClass(), flight.getNumberOfSeats(), flight.getDeparture(),
+					flight.getArrival(), flight.getId());
+			if (changed == 0) {
+				throw new EntityNotFoundException("Flight with id " + flight.getId() + " not found in DB!");
+			} 
+			jdbcTemplate.update("DELETE FROM flight_customer WHERE flight_id = ?", flight.getId());
+			List<Customer> customer = DaoFactory.INSTANCE.getCustomerDao().getByFlightId(flight.getId());
+			List<Customer> customersNotInFlight = new ArrayList<>();
+			for(int i = 0; i < flight.getCustomers().size(); i++) {
+				Customer temporaryCustomer = flight.getCustomers().get(i);
+				if(!customer.contains(temporaryCustomer)) {
+					customersNotInFlight.add(temporaryCustomer);
+				}
+			}
+			insertCustomers(customersNotInFlight, flight.getId());
 			return flight;
+
 		}
 	}
 
-	private void insertFlight(List<Customer> customers, long flightId) {
+
+	private void insertCustomers(List<Customer> customers, long flightId) {
 		if (customers == null || customers.size() == 0) {
 			return;
 		}
 		StringBuilder sb = new StringBuilder();
-		sb.append("INSERT INTO student_attendance (attendance_id, student_id) VALUES ");
+		sb.append("INSERT INTO flight_customer (customer_id, flight_id) VALUES ");
 		for (Customer customer : customers) {
-			sb.append('(').append(flightId).append(',').append(customer.getId()).append("),");
+			sb.append('(').append(customer.getId()).append(',').append(flightId).append("),");
 		}
 		String sql = sb.substring(0, sb.length() - 1);
 		jdbcTemplate.update(sql);

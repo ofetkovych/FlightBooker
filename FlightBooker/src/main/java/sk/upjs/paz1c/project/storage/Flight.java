@@ -16,9 +16,12 @@ public class Flight {
     private Integer numberOfSeats;
     private LocalDateTime departure;
     private LocalDateTime arrival;
-    private List<Customer> customers;
-    
-	public Flight(Long id, LocalDate dateOfFlight, Long from, Long where, String companyName, String flightClass,
+	private List<Customer> customers;
+	
+	
+	
+	
+    public Flight(Long id, LocalDate dateOfFlight, Long from, Long where, String companyName, String flightClass,
 			Integer numberOfSeats, LocalDateTime departure, LocalDateTime arrival) {
 		super();
 		this.id = id;
@@ -31,6 +34,27 @@ public class Flight {
 		this.departure = departure;
 		this.arrival = arrival;
 	}
+
+
+
+
+
+	public Flight(LocalDate dateOfFlight, Long from, Long where, String companyName, String flightClass,
+			Integer numberOfSeats, LocalDateTime departure, LocalDateTime arrival) {
+		super();
+		this.dateOfFlight = dateOfFlight;
+		this.from = from;
+		this.where = where;
+		this.companyName = companyName;
+		this.flightClass = flightClass;
+		this.numberOfSeats = numberOfSeats;
+		this.departure = departure;
+		this.arrival = arrival;
+	}
+    
+    
+	
+	
 
 	public Flight(Long id, LocalDate dateOfFlight, Long from, Long where, String companyName, String flightClass,
 			Integer numberOfSeats, LocalDateTime departure, LocalDateTime arrival, List<Customer> customers) {
@@ -46,6 +70,24 @@ public class Flight {
 		this.arrival = arrival;
 		this.customers = new ArrayList<Customer>();
 	}
+
+	public Flight(LocalDate dateOfFlight, Long from, Long where, String companyName, String flightClass,
+			Integer numberOfSeats, LocalDateTime departure, LocalDateTime arrival, List<Customer> customers) {
+		super();
+		this.dateOfFlight = dateOfFlight;
+		this.from = from;
+		this.where = where;
+		this.companyName = companyName;
+		this.flightClass = flightClass;
+		this.numberOfSeats = numberOfSeats;
+		this.departure = departure;
+		this.arrival = arrival;
+		this.customers = new ArrayList<Customer>();
+	}
+
+
+
+
 
 	public Long getId() {
 		return id;
@@ -126,5 +168,17 @@ public class Flight {
 	public void setCustomers(List<Customer> customers) {
 		this.customers = customers;
 	}
+
+
+
+
+
+	@Override
+	public String toString() {
+		return "Flight [id=" + id + ", dateOfFlight=" + dateOfFlight + ", from=" + from + ", where=" + where
+				+ ", companyName=" + companyName + ", flightClass=" + flightClass + ", numberOfSeats=" + numberOfSeats
+				+ ", departure=" + departure + ", arrival=" + arrival + ", customers=" + customers + "]";
+	}
+	
     
 }

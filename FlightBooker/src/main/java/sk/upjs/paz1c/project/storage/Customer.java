@@ -11,6 +11,41 @@ public class Customer {
 	private String gender;
 	private Long phoneNumber;
 	private String adress;
+	private long flightId;
+	
+	
+	public Customer(String name, String surname, LocalDate dateOfBirth, String gender, Long phoneNumber, String adress,
+			long flightId) {
+		super();
+		this.name = name;
+		this.surname = surname;
+		this.dateOfBirth = dateOfBirth;
+		this.gender = gender;
+		this.phoneNumber = phoneNumber;
+		this.adress = adress;
+		this.flightId = flightId;
+	}
+
+	public Customer(Long id, String name, String surname, LocalDate dateOfBirth, String gender, Long phoneNumber,
+			String adress, long flightId) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.surname = surname;
+		this.dateOfBirth = dateOfBirth;
+		this.gender = gender;
+		this.phoneNumber = phoneNumber;
+		this.adress = adress;
+		this.flightId = flightId;
+	}
+
+	public long getFlightId() {
+		return flightId;
+	}
+
+	public void setFlightId(long flightId) {
+		this.flightId = flightId;
+	}
 
 	public Long getId() {
 		return id;

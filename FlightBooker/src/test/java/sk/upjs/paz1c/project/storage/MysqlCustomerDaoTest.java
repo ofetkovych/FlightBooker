@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
@@ -20,10 +21,16 @@ class MysqlCustomerDaoTest {
 	private FlightDao flightDao;
 	private CustomerDao customerDao;
 	private Customer savedCustomer;
+	private Flight savedFlight;
+	private List<Customer> savedCustomers;
+	private Airport airport;
+	private AirportDao airportDao;
 
 	public MysqlCustomerDaoTest() {
 		DaoFactory.INSTANCE.testing();
 		customerDao = DaoFactory.INSTANCE.getCustomerDao();
+		flightDao = DaoFactory.INSTANCE.getFlightDao();
+		airportDao = DaoFactory.INSTANCE.getAirportDao();
 	}
 
 	@BeforeEach
@@ -43,7 +50,7 @@ class MysqlCustomerDaoTest {
 		List<Customer> customers = customerDao.getAll();
 		assertNotNull(customers);
 		assertTrue(customers.size() > 0);
-		System.out.println(customers);
+		// System.out.println(customers);
 	}
 
 	@Test
@@ -167,38 +174,63 @@ class MysqlCustomerDaoTest {
 		Customer saved2 = customerDao.delete(saved.getId());
 		String nameSaved2 = saved2.getName();
 		assertEquals(nameSaved, nameSaved2);
+
+		LocalDateTime departure = LocalDateTime.of(2021, 12, 5, 12, 34, 45);
+		LocalDateTime arrival = LocalDateTime.of(2021, 12, 5, 12, 50, 45);
+		Airport airport = new Airport("England", "London", "London airport", "LND");
+		Airport airportSaved = airportDao.save(airport);
+		List<Customer> customers = DaoFactory.INSTANCE.getCustomerDao().getAll();
+		Flight flight = new Flight(date, airportSaved.getId(), airportSaved.getId(), "Slovak Airlines", "Bussines", 40,
+				departure, arrival, customers);
+		flight.getCustomers().add(customers.get(0));
+		flight = flightDao.save(flight);
+		System.out.println(customers);
+		System.out.println(flight.toString());
+
 		assertThrows(EntityNotFoundException.class, new Executable() {
 			@Override
 			public void execute() throws Throwable {
 				customerDao.getById(saved.getId());
 			}
 		});
+		assertThrows(EntityUndeleteableException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				customerDao.delete(customers.get(0).getId());
+			}
+		});
 	}
 
-//		assertThrows(EntityUndeleteableException.class, new Executable() {
-//			@Override
-//			public void execute() throws Throwable {
-//				customerDao.delete(saved.getId());
-//			}
-//		});
-//	}
 	@Test
 	void testGetByFlightId() {
 		LocalDate date = LocalDate.of(2021, 12, 21);
 		LocalDateTime departure = LocalDateTime.of(2021, 12, 5, 12, 34, 45);
 		LocalDateTime arrival = LocalDateTime.of(2021, 12, 5, 12, 50, 45);
-		Flight flight = new Flight(1L, date, 1L , 2L , "Slovak Airlines", "Bussines", 40, departure, arrival );
-		List<Customer> list = customerDao.getByFlightId(1);
-		Customer customer = new Customer("Tester", "Of bySubjectId", date, "Male", 24L, "Martinska ulica");
+		Airport airport = new Airport("England", "London", "London airport", "LND");
+		Airport airportSaved = airportDao.save(airport);
+		// System.out.println(flight);
+
+		Customer customer1 = new Customer("Tester", "Of bySubjectId", date, "Male", 24L, "Martinska ulica");
+		Customer customer2 = customerDao.save(customer1);
+		List<Customer> customers = customerDao.getAll();
+		Flight flight = new Flight(date, airportSaved.getId(), airportSaved.getId(), "Slovak Airlines", "Bussines", 45,
+				departure, arrival, customers);
+		flight.getCustomers().add(customer2);
 		Flight saved = flightDao.save(flight);
-		assertEquals(list.size() + 1, customerDao.getByFlightId(1).size());
-		customerDao.delete(saved.getId());
+		List<Customer> list = customerDao.getByFlightId(saved.getId());
+		saved.getCustomers().add(customers.get(0));
+		System.out.println(saved);
+		flightDao.save(saved);
+		assertEquals(list.size() + 1, customerDao.getByFlightId(saved.getId()).size());
+		assertThrows(EntityUndeleteableException.class, new Executable() {
+			@Override
+			public void execute() throws Throwable {
+				customerDao.delete(customer2.getId());
+			}
+		});
 
 		List<Customer> list2 = customerDao.getByFlightId(-1);
 		assertEquals(0, list2.size());
 	}
-//
-//
-//	
 
 }
