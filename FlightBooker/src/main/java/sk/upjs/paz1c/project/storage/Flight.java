@@ -18,6 +18,7 @@ public class Flight {
     private LocalDateTime arrival;
 	private List<Customer> customers;
 	
+	private AirportDao airportDao = DaoFactory.INSTANCE.getAirportDao();
 	
 	
 	
@@ -175,9 +176,7 @@ public class Flight {
 
 	@Override
 	public String toString() {
-		return "Flight [id=" + id + ", dateOfFlight=" + dateOfFlight + ", from=" + from + ", where=" + where
-				+ ", companyName=" + companyName + ", flightClass=" + flightClass + ", numberOfSeats=" + numberOfSeats
-				+ ", departure=" + departure + ", arrival=" + arrival + ", customers=" + customers + "]";
+		return "ID: " + id + " - FROM: " + airportDao.getById(from) + " | WHERE: " + airportDao.getById(where);
 	}
 	
     

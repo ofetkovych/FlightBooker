@@ -228,4 +228,33 @@ public class MysqlFlightDao implements FlightDao {
 		});
 		return flightsAtoC;
 	}
+
+	@Override
+	public List<Flight> getAll() {
+		String sql = "SELECT id, date_of_flight, airport_from, airport_where, company_name, flight_class,"
+				+ "number_of_seats, departure, arrival FROM flight";
+		return jdbcTemplate.query(sql, new RowMapper<Flight>() {
+
+			@Override
+			public Flight mapRow(ResultSet rs, int rowNum) throws SQLException {
+				long id = rs.getLong("id");
+				LocalDate dateOfFlight = rs.getDate("date_of_flight").toLocalDate();
+				Long airportFrom = rs.getLong("airport_from");
+				Long airportWhere = rs.getLong("airport_where");
+				String companyName = rs.getString("company_name");
+				String flightClass = rs.getString("flight_class");
+				Integer numberOfSeats = rs.getInt("number_of_seats");
+				LocalDateTime departure = rs.getTimestamp("departure").toLocalDateTime();
+				LocalDateTime arrival = rs.getTimestamp("arrival").toLocalDateTime();
+
+				
+				
+
+				return new Flight(id, dateOfFlight, airportFrom, airportWhere,
+						companyName, flightClass, numberOfSeats, departure, arrival);
+			}
+
+		});
+
+	}
 }

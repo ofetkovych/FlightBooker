@@ -125,7 +125,7 @@ public class Customer {
 
 	
 	public String toString() {
-		return name + " " + surname;
+		return "ID: " + id + " - " + name + " " + surname;
 	}
 
 	// Po vymazani nebude mat ID tak ho budeme porovnavat cez tento konstruktor

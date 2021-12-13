@@ -1,6 +1,29 @@
 package sk.upjs.paz1c.project.storage;
 
+import java.util.Objects;
+
 public class Airport {
+	
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(airportAcronym, airportName, city, country, id);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Airport other = (Airport) obj;
+		return Objects.equals(airportAcronym, other.airportAcronym) && Objects.equals(airportName, other.airportName)
+				&& Objects.equals(city, other.city) && Objects.equals(country, other.country)
+				&& Objects.equals(id, other.id);
+	}
+
 	private Long id;
 	private String country;
 	private String city;
@@ -75,7 +98,12 @@ public class Airport {
 		}
 		this.airportAcronym = airportAcronym;
 	}
-	
+
+	@Override
+	public String toString() {
+		return airportName;
+	}
+
 	
 }
 

@@ -4,6 +4,8 @@ import java.util.List;
 
 public interface FlightDao {
 	
+	List<Flight> getAll();
+	
 	List<List<String>> fromAtoB(Flight from, Flight where);
 	
 	List<List<String>> fromAtoC(Flight from, Flight where);

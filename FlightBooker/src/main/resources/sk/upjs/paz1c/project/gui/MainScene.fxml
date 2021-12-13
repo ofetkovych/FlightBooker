@@ -5,8 +5,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #1d3557;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #1d3557; -fx-border-color: #E6BF00#E6BF00; -fx-border-width: 10;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <Button fx:id="addCustomerButton" layoutX="53.0" layoutY="81.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="139.0" text="ADD CUSTOMER" />
       <Button fx:id="updateCustomerButton" layoutX="53.0" layoutY="144.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="139.0" text="UPDATE CUSTOMER" />
@@ -14,10 +13,11 @@
       <Button fx:id="updateFlightButton" layoutX="408.0" layoutY="144.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="139.0" text="UPDATE FLIGHT" />
       <Button fx:id="addAirportButton" layoutX="243.0" layoutY="106.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="114.0" text="ADD AIRPORT" />
       <Button layoutX="243.0" layoutY="257.0" mnemonicParsing="false" prefHeight="49.0" prefWidth="114.0" text="BOOK FLIGHT" />
-      <Label layoutX="158.0" text="FLIGHTBOOKER alpha" textFill="#f7f7f7">
+      <Label layoutX="158.0" layoutY="8.0" text="FLIGHTBOOKER alpha" textFill="#f7f7f7">
          <font>
             <Font name="Bangla MN" size="24.0" />
          </font>
       </Label>
+      <Button fx:id="creditsButton" layoutX="26.0" layoutY="353.0" mnemonicParsing="false" onAction="#credits" text="CREDITS" />
    </children>
 </AnchorPane>

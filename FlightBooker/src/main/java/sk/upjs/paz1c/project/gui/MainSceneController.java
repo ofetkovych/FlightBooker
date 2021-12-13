@@ -11,7 +11,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import sk.upjs.paz1c.project.storage.Customer;
@@ -20,49 +22,148 @@ import sk.upjs.paz1c.project.storage.DaoFactory;
 
 public class MainSceneController {
 
-	    @FXML
-	    private Button addAirportButton;
+	@FXML
+    private Button creditsButton;
+	
+	@FXML
+	private Button addAirportButton;
 
-	    @FXML
-	    private Button addCustomerButton;
+	@FXML
+	private Button addCustomerButton;
 
-	    @FXML
-	    private Button addFlightButton;
+	@FXML
+	private Button addFlightButton;
 
-	    @FXML
-	    private Button updateCustomerButton;
+	@FXML
+	private Button updateCustomerButton;
 
-	    @FXML
-	    private Button updateFlightButton;
-	    
-	    private ObjectProperty<Customer> selectedSubject = new SimpleObjectProperty<>();
-	    private CustomerDao customerDao = DaoFactory.INSTANCE.getCustomerDao();
-	    
-	    @FXML
-	    void initialize() {
-	    	
-	    	addCustomerButton.setOnAction(new EventHandler<ActionEvent>() {
+	@FXML
+	private Button updateFlightButton;
 
-				@Override
-				public void handle(ActionEvent event) {
-					try {
-						AddCustomerController controller = new AddCustomerController();
-						FXMLLoader loader = new FXMLLoader(getClass().getResource("AddCustomer.fxml"));
-						loader.setController(controller);
-						Parent parent = loader.load();
-						Scene scene = new Scene(parent);
-						Stage stage = new Stage();
-						stage.setScene(scene);
-						stage.initModality(Modality.APPLICATION_MODAL);
-						stage.setTitle("ADD CUSTOMER");
-						stage.show();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+	private ObjectProperty<Customer> selectedCustomer = new SimpleObjectProperty<>();
+	private CustomerDao customerDao = DaoFactory.INSTANCE.getCustomerDao();
+	
+	@FXML
+    void credits(ActionEvent event) {
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setContentText("Thanks for using our FlightBooker!\n"
+				+ "Made by:\n Oleksandr Fetkovych - Саша\n"
+				+ "and\n"
+				+ "Adam Kundracik");
+		alert.showAndWait();
+	}
+
+	@FXML
+	void initialize() {
+
+		addCustomerButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				try {
+					AddCustomerController controller = new AddCustomerController();
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("AddCustomer.fxml"));
+					loader.setController(controller);
+					Parent parent = loader.load();
+					Scene scene = new Scene(parent);
+					Stage stage = new Stage();
+					stage.setScene(scene);
+					stage.initModality(Modality.APPLICATION_MODAL);
+					stage.setTitle("ADD CUSTOMER");
+					stage.show();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			});
-	    	
+			}
+		});
+
+		updateCustomerButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				try {
+					UpdateCustomerController controller = new UpdateCustomerController();
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("UpdateCustomer.fxml"));
+					loader.setController(controller);
+					Parent parent = loader.load();
+					Scene scene = new Scene(parent);
+					Stage stage = new Stage();
+					stage.setScene(scene);
+					stage.initModality(Modality.APPLICATION_MODAL);
+					stage.setTitle("UPDATE CUSTOMER");
+					stage.show();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+
+		});
+		
+		addAirportButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				try {
+					AddAirportController controller = new AddAirportController();
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("AddAirport.fxml"));
+					loader.setController(controller);
+					Parent parent = loader.load();
+					Scene scene = new Scene(parent);
+					Stage stage = new Stage();
+					stage.setScene(scene);
+					stage.initModality(Modality.APPLICATION_MODAL);
+					stage.setTitle("ADD AIRPORT");
+					stage.show();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+
+		addFlightButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				try {
+					AddFlightController controller = new AddFlightController();
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("AddFlight.fxml"));
+					loader.setController(controller);
+					Parent parent = loader.load();
+					Scene scene = new Scene(parent);
+					Stage stage = new Stage();
+					stage.setScene(scene);
+					stage.initModality(Modality.APPLICATION_MODAL);
+					stage.setTitle("ADD FLIGHT");
+					stage.show();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}				
+			}
+		});
+		updateFlightButton.setOnAction(new EventHandler<ActionEvent>() {
+
+			@Override
+			public void handle(ActionEvent event) {
+				try {
+					UpdateFlightController controller = new UpdateFlightController();
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("UpdateFlight.fxml"));
+					loader.setController(controller);
+					Parent parent = loader.load();
+					Scene scene = new Scene(parent);
+					Stage stage = new Stage();
+					stage.setScene(scene);
+					stage.initModality(Modality.APPLICATION_MODAL);
+					stage.setTitle("ADD FLIGHT");
+					stage.show();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}								
+			}
+		});
 	}
 }
-

@@ -2,12 +2,16 @@ package sk.upjs.paz1c.project.gui;
 
 import java.time.LocalDate;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import sk.upjs.paz1c.project.storage.Customer;
 
 public class CustomerFxModel {
@@ -16,9 +20,10 @@ public class CustomerFxModel {
 	private StringProperty name = new SimpleStringProperty();
 	private StringProperty surname = new SimpleStringProperty();
 	private ObjectProperty<LocalDate> dateOfBirth = new SimpleObjectProperty<LocalDate>();
-	private StringProperty gender = new SimpleStringProperty();
+	private BooleanProperty male  = new SimpleBooleanProperty();
 	private StringProperty phoneNumber = new SimpleStringProperty();
 	private StringProperty adress = new SimpleStringProperty();
+	private ObservableList<Customer> customers;
 
 	public CustomerFxModel(Customer customer) {
 		super();
@@ -26,13 +31,13 @@ public class CustomerFxModel {
 		setName(customer.getName());
 		setSurname(customer.getSurname());
 		setDateOfBirth(customer.getDateOfBirth());
-		setGender(customer.getGender());
+		setMale(customer.getGender().equals("Male"));
 		setPhoneNumber(customer.getPhoneNumber().toString());
 		setAdress(customer.getAdress());
 	}
 
 	public CustomerFxModel() {
-
+		customers = FXCollections.observableArrayList();
 	}
 
 	public Long getId() {
@@ -67,12 +72,12 @@ public class CustomerFxModel {
 		this.dateOfBirth.set(dateOfBirth);
 	}
 
-	public String getGender() {
-		return gender.get();
+	public Boolean getMale() {
+		return male.get();
 	}
 
-	public void setGender(String gender) {
-		this.gender.set(gender);
+	public void setMale(Boolean male) {
+		this.male.set(male);
 		;
 	}
 
@@ -104,8 +109,8 @@ public class CustomerFxModel {
 		return this.dateOfBirth;
 	}
 
-	public StringProperty genderProperty() {
-		return this.gender;
+	public BooleanProperty maleProperty() {
+		return this.male;
 	}
 
 	public StringProperty phoneNumberProperty() {
@@ -115,11 +120,15 @@ public class CustomerFxModel {
 	public StringProperty adressProperty() {
 		return this.adress;
 	}
+	
+	public ObservableList<Customer> getCustomersModel() {
+		return customers;
+	}
 
 	public Customer getCustomer() {
 		String number = getPhoneNumber();
 		Long phoneNumber = Long.parseLong(number);
-		return new Customer(id ,getName(), getSurname(), getDateOfBirth(), getGender(), phoneNumber, getAdress());
+		return new Customer(id ,getName(), getSurname(), getDateOfBirth(), getMale()? "Male": "Female" , phoneNumber, getAdress());
 	}
 
 }
