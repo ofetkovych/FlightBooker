@@ -25,7 +25,7 @@
             <Font name="Bangla MN" size="13.0" />
          </font>
       </Label>
-      <DatePicker fx:id="dateOfBirthPicker" layoutX="402.0" layoutY="174.0" prefHeight="26.0" prefWidth="160.0" />
+      <DatePicker fx:id="dateOfBirthPicker" layoutX="402.0" layoutY="174.0" prefHeight="26.0" prefWidth="160.0" promptText="DD.MM.YYYY" />
       <Label layoutX="282.0" layoutY="173.0" text="Date of birth" textFill="WHITE">
          <font>
             <Font name="Bangla MN" size="13.0" />
@@ -61,15 +61,15 @@
       </Label>
       <Button fx:id="updateButton" layoutX="491.0" layoutY="352.0" mnemonicParsing="false" onAction="#updateCustomer" prefHeight="26.0" prefWidth="68.0" text="Update" />
       <Button fx:id="cancelButton" layoutX="408.0" layoutY="353.0" mnemonicParsing="false" onAction="#cancel" prefHeight="26.0" prefWidth="71.0" text="Cancel" />
-      <ImageView fitHeight="179.0" fitWidth="195.0" layoutX="64.0" layoutY="125.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../../../../../../../../Desktop/update.png" />
-         </image>
-      </ImageView>
-      <Label layoutX="32.0" layoutY="350.0" text="Note: You can edit customer info " textFill="WHITE">
+      <Label layoutX="32.0" layoutY="350.0" text="Note: You can edit customer inf " textFill="WHITE">
          <font>
             <Font name="Bangla MN" size="13.0" />
          </font>
       </Label>
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="69.0" layoutY="128.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../../../../../../../../../Desktop/update.png" />
+         </image>
+      </ImageView>
    </children>
 </AnchorPane>

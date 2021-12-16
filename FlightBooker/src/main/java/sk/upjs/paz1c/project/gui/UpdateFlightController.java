@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -89,7 +90,7 @@ public class UpdateFlightController {
 					Optional<ButtonType> button = alert.showAndWait();
 					if (button.get() == ButtonType.OK) {
 						List<Customer> customers = flightFxModel.getCustomers();
-						SelectedFlightUpdateController controller = new SelectedFlightUpdateController(flight, customers);
+						SelectedFlightUpdateController controller = new SelectedFlightUpdateController(flight);
 						openUpdateFlightWindow(controller);
 
 					}

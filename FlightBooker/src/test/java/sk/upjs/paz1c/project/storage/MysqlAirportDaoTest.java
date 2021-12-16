@@ -71,32 +71,21 @@ class MysqlAirportDaoTest {
 	@Test
 	void testGetById() {
 		Airport byId = airportDao.getById(savedAirport.getId());
-		assertEquals(savedAirport.getId(), byId.getId());
-		assertEquals(savedAirport.getCountry(), byId.getCountry());
-		assertEquals(savedAirport.getCity(), byId.getCity());
-		assertEquals(savedAirport.getAirportName(), byId.getAirportName());
-		assertEquals(savedAirport.getAirportAcronym(), byId.getAirportAcronym());
+		assertEquals(savedAirport, byId);
 	}
 
 	@Test
 	void testUpdate() {
 		Airport changedAirport = new Airport(savedAirport.getId(), "Test", "update", "Miskolc", "MSC");
 		Airport savedChangedAirport = airportDao.save(changedAirport);
-		assertEquals("Test", savedChangedAirport.getCountry());
-		assertEquals("update", savedChangedAirport.getCity());
-		assertEquals("Miskolc", savedChangedAirport.getAirportName());
-		assertEquals("MSC", savedChangedAirport.getAirportAcronym());
-		assertEquals(changedAirport.getId(), savedChangedAirport.getId());
+		assertEquals(changedAirport, savedChangedAirport);
 		
 		List<Airport> all = airportDao.getAll();
 		boolean found = false;
 		for(Airport airport: all) {
 			if (airport.getId().equals(changedAirport.getId())) { //long > 127 musi .equals() | long < 128 moze s == !!!
 				found = true;
-				assertEquals("Test", airport.getCountry());
-				assertEquals("update", airport.getCity());
-				assertEquals("Miskolc", airport.getAirportName());
-				assertEquals("MSC", airport.getAirportAcronym());
+				assertEquals(changedAirport, airport);
 				break;
 			}
 		}
@@ -117,6 +106,7 @@ class MysqlAirportDaoTest {
 				airportDao.save(null);
 			}
 		});
+
 
 	}
 	@Test

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -43,10 +44,12 @@ public class MainSceneController {
 	private ObjectProperty<Customer> selectedCustomer = new SimpleObjectProperty<>();
 	private CustomerDao customerDao = DaoFactory.INSTANCE.getCustomerDao();
 	
+	private FlightFxModel flightFxModel;
+	
 	@FXML
     void credits(ActionEvent event) {
 		Alert alert = new Alert(AlertType.INFORMATION);
-		alert.setContentText("Thanks for using our FlightBooker!\n"
+		alert.setContentText("Thanks for using our FlightBooker app!\n"
 				+ "Made by:\n Oleksandr Fetkovych - Саша\n"
 				+ "and\n"
 				+ "Adam Kundracik");
@@ -148,6 +151,7 @@ public class MainSceneController {
 
 			@Override
 			public void handle(ActionEvent event) {
+				//ObservableList<Customer> onFlight = flightFxModel.getCustomers();
 				try {
 					UpdateFlightController controller = new UpdateFlightController();
 					FXMLLoader loader = new FXMLLoader(getClass().getResource("UpdateFlight.fxml"));

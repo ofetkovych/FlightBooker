@@ -35,10 +35,10 @@ public class FlightFxModel {
 	private ObjectProperty<LocalDateTime> arrival = new SimpleObjectProperty<LocalDateTime>();
 	private ObservableList<Flight> flights;
 	private ObservableList<Customer> customers;
-	private List<Customer> onFLight = new ArrayList<>();
+	private ObservableList<Customer> onFlight;
 
-	public List<Customer> getOnFLight() {
-		return onFLight;
+	public ObservableList<Customer> getOnFLight() {
+		return onFlight;
 	}
 
 	private AirportDao airportDao = DaoFactory.INSTANCE.getAirportDao();
@@ -48,10 +48,10 @@ public class FlightFxModel {
 	}
 
 	public FlightFxModel() {
-		flights = FXCollections.observableArrayList();
+		customers = FXCollections.observableArrayList();
 	}
 
-	public FlightFxModel(Flight flight, List<Customer> onFlight) {
+	public FlightFxModel(Flight flight) {
 		super();
 		this.id = flight.getId();
 		setDateOfFlight(flight.getDateOfFlight());
@@ -62,13 +62,8 @@ public class FlightFxModel {
 		setSeats(flight.getNumberOfSeats().toString());
 		setDeparture(flight.getDeparture());
 		setArrival(flight.getArrival());
-		if (customers == null) {
-			onFlight = new ArrayList<>();
-		} else {
-			for (Customer c : customers) {
-				onFlight.add(c);
-			}
-		}
+		List<Customer> customers = DaoFactory.INSTANCE.getCustomerDao().getByFlightId(flight.getId());
+		this.customers = FXCollections.observableArrayList(customers);
 
 	}
 
@@ -186,9 +181,13 @@ public class FlightFxModel {
 	public ObservableList<Flight> getFlightModel() {
 		return flights;
 	}
+	
+	public ObservableList<Customer> getCustomerModel() {
+		return customers;
+	}
 
 	public List<Customer> getCustomers() {
-		return customers;
+		return new ArrayList<>(customers);
 	}
 
 	public Flight getFlight() {

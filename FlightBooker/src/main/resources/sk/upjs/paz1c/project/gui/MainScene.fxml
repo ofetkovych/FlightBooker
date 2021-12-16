@@ -18,6 +18,6 @@
             <Font name="Bangla MN" size="24.0" />
          </font>
       </Label>
-      <Button fx:id="creditsButton" layoutX="26.0" layoutY="353.0" mnemonicParsing="false" onAction="#credits" text="CREDITS" />
+      <Button fx:id="creditsButton" layoutX="26.0" layoutY="353.0" mnemonicParsing="false" onAction="#credits" style="-fx-background-image: info.jpg;" text="CREDITS" />
    </children>
 </AnchorPane>

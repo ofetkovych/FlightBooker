@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class Flight {
     private Long id;
@@ -166,6 +167,37 @@ public class Flight {
 		return customers;
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(airportDao, arrival, companyName, customers, dateOfFlight, departure, flightClass, from, id,
+				numberOfSeats, where);
+	}
+
+
+
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Flight other = (Flight) obj;
+		return Objects.equals(airportDao, other.airportDao) && Objects.equals(arrival, other.arrival)
+				&& Objects.equals(companyName, other.companyName) && Objects.equals(customers, other.customers)
+				&& Objects.equals(dateOfFlight, other.dateOfFlight) && Objects.equals(departure, other.departure)
+				&& Objects.equals(flightClass, other.flightClass) && Objects.equals(from, other.from)
+				&& Objects.equals(id, other.id) && Objects.equals(numberOfSeats, other.numberOfSeats)
+				&& Objects.equals(where, other.where);
+	}
+
+
+
+
+
 	public void setCustomers(List<Customer> customers) {
 		this.customers = customers;
 	}
@@ -176,8 +208,17 @@ public class Flight {
 
 	@Override
 	public String toString() {
-		return "ID: " + id + " - FROM: " + airportDao.getById(from) + " | WHERE: " + airportDao.getById(where);
+		return "Flight [id=" + id + ", dateOfFlight=" + dateOfFlight + ", from=" + from + ", where=" + where
+				+ ", companyName=" + companyName + ", flightClass=" + flightClass + ", numberOfSeats=" + numberOfSeats
+				+ ", departure=" + departure + ", arrival=" + arrival + ", customers=" + customers + "]";
 	}
+
 	
+//
+//	@Override
+//	public String toString() {
+//		return "ID: " + id + " - FROM: " + airportDao.getById(from) + " | WHERE: " + airportDao.getById(where);
+//	}
+//	
     
 }

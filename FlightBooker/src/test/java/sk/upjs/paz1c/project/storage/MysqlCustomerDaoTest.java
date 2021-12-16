@@ -56,13 +56,7 @@ class MysqlCustomerDaoTest {
 	@Test
 	void testGetById() {
 		Customer byIdCustomer = customerDao.getById(savedCustomer.getId());
-		assertEquals(savedCustomer.getId(), byIdCustomer.getId());
-		assertEquals(savedCustomer.getName(), byIdCustomer.getName());
-		assertEquals(savedCustomer.getSurname(), byIdCustomer.getSurname());
-		assertEquals(savedCustomer.getDateOfBirth(), byIdCustomer.getDateOfBirth());
-		assertEquals(savedCustomer.getGender(), byIdCustomer.getGender());
-		assertEquals(savedCustomer.getPhoneNumber(), byIdCustomer.getPhoneNumber());
-		assertEquals(savedCustomer.getAdress(), byIdCustomer.getAdress());
+		assertEquals(savedCustomer, byIdCustomer);
 		assertThrows(EntityNotFoundException.class, new Executable() {
 			@Override
 			public void execute() throws Throwable {
@@ -78,12 +72,10 @@ class MysqlCustomerDaoTest {
 		int initialSize = customerDao.getAll().size();
 		Customer newCustomer = new Customer("Testovač", "Insertu", date, "nema gender", 23L, "Presovska ulica");
 		Customer savedNewCustomer = customerDao.save(newCustomer);
-		assertEquals(savedNewCustomer.getName(), newCustomer.getName());
-		assertEquals(savedNewCustomer.getSurname(), newCustomer.getSurname());
-		assertEquals(savedNewCustomer.getDateOfBirth(), newCustomer.getDateOfBirth());
-		assertEquals(savedNewCustomer.getGender(), newCustomer.getGender());
-		assertEquals(savedNewCustomer.getPhoneNumber(), newCustomer.getPhoneNumber());
-		assertEquals(savedNewCustomer.getAdress(), newCustomer.getAdress());
+		newCustomer.setId(savedNewCustomer.getId());
+		// System.out.println(savedNewCustomer);
+		// System.out.println(newCustomer);
+		assertEquals(savedNewCustomer, newCustomer);
 		assertNotNull(savedNewCustomer.getId());
 		List<Customer> all = customerDao.getAll();
 		assertEquals(initialSize + 1, all.size());
@@ -92,24 +84,12 @@ class MysqlCustomerDaoTest {
 		for (Customer customer : all) {
 			if (customer.getId().equals(savedNewCustomer.getId())) {
 				found = true;
-				assertEquals("Testovač", customer.getName());
-				assertEquals("Insertu", customer.getSurname());
-				assertEquals(date, customer.getDateOfBirth());
-				assertEquals("nema gender", customer.getGender());
-				assertEquals(23L, customer.getPhoneNumber());
-				assertEquals("Presovska ulica", customer.getAdress());
+				assertEquals(savedNewCustomer, customer);
 				break;
 			}
 		}
 		assertTrue(found);
 		customerDao.delete(savedNewCustomer.getId());
-//		Customer newCustomer2 = new Customer("Testova", "Zlho", date, "nema gender", -23L , "Presovska ulica");
-//		assertThrows(EntityNotFoundException.class, new Executable() {
-//			@Override
-//			public void execute() throws Throwable {
-//				customerDao.save(newCustomer2);
-//			}
-//		});
 	}
 
 	@Test
@@ -118,24 +98,14 @@ class MysqlCustomerDaoTest {
 		Customer changedCustomer = new Customer(savedCustomer.getId(), "Test", "Update", date, "Male", 24L,
 				"Bratislavska ulica");
 		Customer savedChangedCustomer = customerDao.save(changedCustomer);
-		assertEquals("Test", savedChangedCustomer.getName());
-		assertEquals("Update", savedChangedCustomer.getSurname());
-		assertEquals(date, savedChangedCustomer.getDateOfBirth());
-		assertEquals("Male", savedChangedCustomer.getGender());
-		assertEquals(24L, savedChangedCustomer.getPhoneNumber());
-		assertEquals("Bratislavska ulica", savedChangedCustomer.getAdress());
+		assertEquals(changedCustomer, savedChangedCustomer);
 
 		List<Customer> all = customerDao.getAll();
 		boolean found = false;
 		for (Customer customer : all) {
 			if (customer.getId().equals(changedCustomer.getId())) {
 				found = true;
-				assertEquals("Test", customer.getName());
-				assertEquals("Update", customer.getSurname());
-				assertEquals(date, customer.getDateOfBirth());
-				assertEquals("Male", customer.getGender());
-				assertEquals(24L, customer.getPhoneNumber());
-				assertEquals("Bratislavska ulica", customer.getAdress());
+				assertEquals(savedChangedCustomer, customer);
 				break;
 			}
 		}
@@ -184,8 +154,7 @@ class MysqlCustomerDaoTest {
 				departure, arrival, customers);
 		flight.getCustomers().add(customers.get(0));
 		flight = flightDao.save(flight);
-		System.out.println(customers);
-		System.out.println(flight.toString());
+		//System.out.println(flight);
 
 		assertThrows(EntityNotFoundException.class, new Executable() {
 			@Override
@@ -208,19 +177,25 @@ class MysqlCustomerDaoTest {
 		LocalDateTime arrival = LocalDateTime.of(2021, 12, 5, 12, 50, 45);
 		Airport airport = new Airport("England", "London", "London airport", "LND");
 		Airport airportSaved = airportDao.save(airport);
-		// System.out.println(flight);
 
 		Customer customer1 = new Customer("Tester", "Of bySubjectId", date, "Male", 24L, "Martinska ulica");
 		Customer customer2 = customerDao.save(customer1);
 		List<Customer> customers = customerDao.getAll();
 		Flight flight = new Flight(date, airportSaved.getId(), airportSaved.getId(), "Slovak Airlines", "Bussines", 45,
 				departure, arrival, customers);
-		flight.getCustomers().add(customer2);
+
 		Flight saved = flightDao.save(flight);
+
+		saved.getCustomers().add(customer2);
+		System.out.println(saved);
+		flightDao.save(saved);
 		List<Customer> list = customerDao.getByFlightId(saved.getId());
+		System.out.println(list.size());
+
 		saved.getCustomers().add(customers.get(0));
 		System.out.println(saved);
 		flightDao.save(saved);
+		System.out.println(saved);
 		assertEquals(list.size() + 1, customerDao.getByFlightId(saved.getId()).size());
 		assertThrows(EntityUndeleteableException.class, new Executable() {
 			@Override
@@ -229,8 +204,8 @@ class MysqlCustomerDaoTest {
 			}
 		});
 
-		List<Customer> list2 = customerDao.getByFlightId(-1);
-		assertEquals(0, list2.size());
-	}
+//		List<Customer> list2 = customerDao.getByFlightId(-1); 
+//		assertEquals(0,list2.size());
 
+	}
 }

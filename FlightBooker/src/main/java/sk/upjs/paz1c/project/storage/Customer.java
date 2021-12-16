@@ -2,8 +2,29 @@ package sk.upjs.paz1c.project.storage;
 
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.Objects;
 
 public class Customer {
+	@Override
+	public int hashCode() {
+		return Objects.hash(adress, dateOfBirth, flightId, gender, id, name, phoneNumber, surname);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Customer other = (Customer) obj;
+		return Objects.equals(adress, other.adress) && Objects.equals(dateOfBirth, other.dateOfBirth)
+				&& flightId == other.flightId && Objects.equals(gender, other.gender) && Objects.equals(id, other.id)
+				&& Objects.equals(name, other.name) && Objects.equals(phoneNumber, other.phoneNumber)
+				&& Objects.equals(surname, other.surname);
+	}
+
 	private Long id;
 	private String name;
 	private String surname;

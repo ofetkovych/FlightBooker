@@ -178,56 +178,6 @@ public class MysqlFlightDao implements FlightDao {
 		}
 	}
 
-	@Override
-	public List<List<String>> fromAtoB(Flight from, Flight where) {
-		String sql = "SELECT a1.airport_name as a111, a2.airport_name as a222\r\n" + "FROM Flight AS f\r\n"
-				+ "INNER JOIN Airport AS a1\r\n" + "ON f.airport_from = a1.id\r\n" + "INNER JOIN Airport AS a2\r\n"
-				+ "ON f.airport_where = a2.id\r\n" + "WHERE airport_from = " + from.getId() + " AND airport_where = "
-				+ where.getId();
-		List<List<String>> flights = jdbcTemplate.query(sql, new RowMapper<List<String>>() {
-
-			@Override
-			public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-				List<String> AtoB = new ArrayList<>();
-				String airportFrom = rs.getString("a111");
-				String airportWhere = rs.getString("a222");
-				AtoB.add(airportFrom);
-				AtoB.add(airportWhere);
-				return AtoB;
-			}
-
-		});
-		return flights;
-	}
-
-	@Override
-	public List<List<String>> fromAtoC(Flight from, Flight where) {
-		String sql = " WITH JoinedFlights AS (\n" + "  SELECT\n" + "    f.id as id,\n" + "    a1.id as origin,\n"
-				+ "    a2.id as target,\n" + "    f.departure as departure,\n" + "    f.arrival as arrival\n"
-				+ "  FROM Flight AS f\n" + "  INNER JOIN Airport AS a1\n" + "  ON f.airport_from = a1.id\n"
-				+ "  INNER JOIN Airport AS a2\n" + "  ON f.airport_where = a2.id\n" + ")\n" + "SELECT DISTINCT\n"
-				+ "  f1.id as firstFlightId,\n" + "  f2.id as secondFlightId\n" + "FROM\n" + "  JoinedFlights f1\n"
-				+ "INNER JOIN\n" + "  JoinedFlights f2\n" + "ON\n" + "  f1.arrival < f2.departure\n" + "WHERE\n"
-				+ "  (f1.origin = 4 AND f1.target = 3) AND (f2.origin = 3 AND f2.target = 1 )\n"
-				+ "GROUP BY f1.id, f2.id\n" + "ORDER BY TIMESTAMPDIFF(SECOND, f1.arrival, f2.departure)";
-
-		List<List<String>> flightsAtoC = jdbcTemplate.query(sql, new RowMapper<List<String>>() {
-
-			@Override
-			public List<String> mapRow(ResultSet rs, int rowNum) throws SQLException {
-				List<String> AtoB = new ArrayList<>();
-				String airportFrom = rs.getString("a111");
-				String through = rs.getString("");
-				String airportWhere = rs.getString("a222");
-				AtoB.add(airportFrom);
-				AtoB.add(through);
-				AtoB.add(airportWhere);
-				return AtoB;
-			}
-
-		});
-		return flightsAtoC;
-	}
 
 	@Override
 	public List<Flight> getAll() {
@@ -257,4 +207,95 @@ public class MysqlFlightDao implements FlightDao {
 		});
 
 	}
+
+	@Override
+	public List<Flight> fromAtoB(Long from, Long where) {
+
+        String sql = "Select id,date_of_flight,airport_from,airport_where,company_name,\r\n" + 
+                "               flight_class,number_of_seats,departure,arrival from flight  where airport_from = ? and airport_where = ?";
+ 
+        List<Flight> listFlight = new ArrayList<Flight>();
+        listFlight = jdbcTemplate.query(sql, new ResultSetExtractor<List<Flight>>() {
+ 
+            @Override
+            public List<Flight> extractData(ResultSet rs) throws SQLException, DataAccessException {
+                List<Flight> flights = new ArrayList<Flight>();
+                while (rs.next()) {
+                    Long id = rs.getLong("id");
+                    LocalDate dateOfFlight = rs.getDate("date_of_flight").toLocalDate();
+                    Long from = rs.getLong("airport_from");
+                    Long where = rs.getLong("airport_where");
+                    String companyName = rs.getString("company_name");
+                    String flightClass = rs.getString("flight_class");
+                    Integer numberOfSeats = rs.getInt("number_of_seats");
+                    LocalDateTime departure = rs.getTimestamp("departure").toLocalDateTime();
+                    LocalDateTime arrival = rs.getTimestamp("arrival").toLocalDateTime();
+                    flights.add(new Flight(id, dateOfFlight, from, where, companyName, flightClass, numberOfSeats,
+                            departure, arrival));
+                }
+                return flights;
+            }
+        }, from, where);
+        
+        if(listFlight.size() > 0) {
+            return listFlight;
+        }
+        else {
+            List<Flight> gh = new ArrayList<>();
+            String sql1 = "Select flight.id,date_of_flight,airport_from,airport_where,company_name,flight_class,number_of_seats,departure,arrival from flight\r\n"
+                    + "join airport as a1 on airport_from = a1.id\r\n" + "join airport as a2 on airport_where = a2.id\r\n"
+                    + "where a1.id = ? or a2.id =?";
+            System.out.println("SQL");
+            System.out.println();
+            return jdbcTemplate.query(sql1, new ResultSetExtractor<List<Flight>>() {
+ 
+                @Override
+                public List<Flight> extractData(ResultSet rs) throws SQLException, DataAccessException {
+                    List<Flight> from_list = new ArrayList<Flight>();
+                    List<Flight> where_list = new ArrayList<Flight>();
+                    while (rs.next()) {
+                        Long id = rs.getLong("id");
+                        LocalDate dateOfFlight = rs.getDate("date_of_flight").toLocalDate();
+                        Long from1 = rs.getLong("airport_from");
+                        Long where1 = rs.getLong("airport_where");
+                        String companyName = rs.getString("company_name");
+                        String flightClass = rs.getString("flight_class");
+                        Integer numberOfSeats = rs.getInt("number_of_seats");
+                        LocalDateTime departure = rs.getTimestamp("departure").toLocalDateTime();
+                        LocalDateTime arrival = rs.getTimestamp("arrival").toLocalDateTime();
+                        Airport a = DaoFactory.INSTANCE.getAirportDao().getById(from1);
+                        Airport a2 = DaoFactory.INSTANCE.getAirportDao().getById(where1);
+                        System.out.println("EXTRACTOR");
+                        System.out.println();
+                        if (a.getId().equals(from)) {
+                            from_list.add(new Flight(id, dateOfFlight, from1, where1, companyName, flightClass,
+                                    numberOfSeats, departure, arrival));
+                            System.out.println("PRVE IF");
+                            System.out.println(from_list);
+                            System.out.println();
+                        }
+                        if (a2.getId().equals(where)) {
+                            where_list.add(new Flight(id, dateOfFlight, from1, where1, companyName, flightClass,
+                                    numberOfSeats, departure, arrival));
+                            System.out.println("DRUHE IF");
+                            System.out.println(where_list);
+                            System.out.println();
+                        }
+                    }
+                    for (int i = 0; i < from_list.size(); i++) {
+                        for (int j = 0; j < where_list.size(); j++) {
+                            if (from_list.get(i).getWhere().equals(where_list.get(j).getFrom()) 
+                                    && from_list.get(i).getArrival().isBefore(where_list.get(j).getDeparture())
+                                    && from_list.get(i).getArrival().isAfter(LocalDateTime.now())) {
+                                gh.add(from_list.get(i));
+                                gh.add(where_list.get(j));
+                                System.out.println("POROVNAVANIE");
+                            }
+                        }
+                    }
+                    return gh;
+                }
+            }, from, where);
+        }
+}
 }
