@@ -206,19 +206,19 @@ public class Flight {
 
 
 
-	@Override
-	public String toString() {
-		return "Flight [id=" + id + ", dateOfFlight=" + dateOfFlight + ", from=" + from + ", where=" + where
-				+ ", companyName=" + companyName + ", flightClass=" + flightClass + ", numberOfSeats=" + numberOfSeats
-				+ ", departure=" + departure + ", arrival=" + arrival + ", customers=" + customers + "]";
-	}
-
-	
-//
 //	@Override
 //	public String toString() {
-//		return "ID: " + id + " - FROM: " + airportDao.getById(from) + " | WHERE: " + airportDao.getById(where);
+//		return "Flight [id=" + id + ", dateOfFlight=" + dateOfFlight + ", from=" + from + ", where=" + where
+//				+ ", companyName=" + companyName + ", flightClass=" + flightClass + ", numberOfSeats=" + numberOfSeats
+//				+ ", departure=" + departure + ", arrival=" + arrival + ", customers=" + customers + "]";
 //	}
-//	
+
+	
+
+	@Override
+	public String toString() {
+		return "ID: " + id + " - FROM: " + airportDao.getById(from) + " | WHERE: " + airportDao.getById(where) + " - Seats: " + numberOfSeats;
+	}
+	
     
 }

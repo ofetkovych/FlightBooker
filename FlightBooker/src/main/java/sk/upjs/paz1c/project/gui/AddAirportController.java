@@ -63,7 +63,9 @@ public class AddAirportController {
     	System.out.println("Ide to");
 		AirportDao airportDao = DaoFactory.INSTANCE.getAirportDao();
 		Airport savedAirport = airportDao.save(airportFxModel.getAirport());
-		System.out.println("SAVED");
+		Alert alert = new Alert(AlertType.INFORMATION);
+		alert.setContentText("AIRPORT \n" + airportFxModel.getAirport() +" \n SAVED SUCCESSFULLY!");
+		alert.showAndWait();
 		createButton.getScene().getWindow().hide();
     }
 }

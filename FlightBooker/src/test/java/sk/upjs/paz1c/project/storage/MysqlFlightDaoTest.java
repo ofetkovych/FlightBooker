@@ -58,7 +58,7 @@ class MysqlFlightDaoTest {
 	
 	@Test
 	void testTest() {
-		System.out.println(flightDao.fromAtoB(2L, 4L));
+		System.out.println(flightDao.fromAtoB("Bratislava Airport", "Trnava Airport"));
 
 		
 	}

@@ -14,6 +14,11 @@ public interface FlightDao {
 	
 	boolean isFull(Flight flight);
 	
-	List<Flight> fromAtoB(Long from, Long where);
+	List<Flight> fromAtoB(String from, String where);
+	
+	void insertCustomers(List<Customer> customers, long flightId);
+	
+	boolean isCustomerInFlight(Customer customer, Flight flight);
+	
 
 }

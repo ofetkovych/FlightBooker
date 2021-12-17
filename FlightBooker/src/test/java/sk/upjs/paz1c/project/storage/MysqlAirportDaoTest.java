@@ -41,6 +41,7 @@ class MysqlAirportDaoTest {
 		Set<String> countries = airportDao.getAllCountries();
 		assertNotNull(countries);
 		assertTrue(countries.size() > 0);
+		//System.out.println(countries);
 	}
 
 	@Test
@@ -57,7 +58,7 @@ class MysqlAirportDaoTest {
 
 	@Test
 	void testGetByCity() {
-		String city = "London";
+		String city = "Trnava";
 //		Set<String> countries = airportDao.getAllCountries();
 //		Set<String> cities = airportDao.getCityByCountry(countries.iterator().next());
 //		System.out.println(cities);
@@ -67,6 +68,11 @@ class MysqlAirportDaoTest {
 		assertTrue(airports.size() > 0);
 		System.out.println(airports);
 	}
+	
+//	@Test
+//	void testGetByCity() {
+//		System.out.println(airportDao.getByCity("London"));
+//	}
 
 	@Test
 	void testGetById() {

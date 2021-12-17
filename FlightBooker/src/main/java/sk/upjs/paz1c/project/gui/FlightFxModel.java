@@ -36,7 +36,8 @@ public class FlightFxModel {
 	private ObservableList<Flight> flights;
 	private ObservableList<Customer> customers;
 	private ObservableList<Customer> onFlight;
-
+	private ObservableList<Flight> flighty;
+	
 	public ObservableList<Customer> getOnFLight() {
 		return onFlight;
 	}
@@ -45,6 +46,10 @@ public class FlightFxModel {
 
 	public void setCustomers(ObservableList<Customer> customers) {
 		this.customers = customers;
+	}
+	
+	public FlightFxModel(List<Flight> flights) {
+		flighty = FXCollections.observableArrayList(flights);
 	}
 
 	public FlightFxModel() {
@@ -64,8 +69,11 @@ public class FlightFxModel {
 		setArrival(flight.getArrival());
 		List<Customer> customers = DaoFactory.INSTANCE.getCustomerDao().getByFlightId(flight.getId());
 		this.customers = FXCollections.observableArrayList(customers);
-
+		
 	}
+	
+	
+	
 
 	public Long getId() {
 		return id;
