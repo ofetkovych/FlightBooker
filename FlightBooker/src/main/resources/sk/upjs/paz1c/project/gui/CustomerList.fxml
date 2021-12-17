@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #1D3557; -fx-border-color: #E6BF00#E6BF00; -fx-border-width: 10;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label layoutX="40.0" layoutY="24.0" text="CUSTOMERS LIST" textFill="WHITE">
+         <font>
+            <Font size="22.0" />
+         </font>
+      </Label>
+      <Button fx:id="cancelButton" layoutX="506.0" layoutY="350.0" mnemonicParsing="false" onAction="#cancel" text="Cancel" />
+      <ListView fx:id="customersTable" layoutX="40.0" layoutY="63.0" prefHeight="274.0" prefWidth="521.0" />
+   </children>
+</AnchorPane>
