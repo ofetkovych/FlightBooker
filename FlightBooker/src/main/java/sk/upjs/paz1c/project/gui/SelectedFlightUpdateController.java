@@ -21,6 +21,7 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Alert.AlertType;
 import javafx.util.StringConverter;
 import sk.upjs.paz1c.project.storage.Airport;
@@ -53,6 +54,9 @@ public class SelectedFlightUpdateController {
 	@FXML
 	private Button updateButton;
 
+	@FXML
+	private ToggleGroup flightClass;
+
 //    @FXML
 //    private DatePicker dateOfFlightPicker;
 
@@ -76,7 +80,6 @@ public class SelectedFlightUpdateController {
 	private ObjectProperty<Airport> selectedAirportFrom = new SimpleObjectProperty<Airport>();
 	private ObjectProperty<Airport> selectedAirportWhere = new SimpleObjectProperty<Airport>();
 	private AirportDao airportDao = DaoFactory.INSTANCE.getAirportDao();
-	private AirportFxModel airportFxModel;
 	
 	public SelectedFlightUpdateController(Flight flight) {
 		flightFxModel = new FlightFxModel(flight);
@@ -118,8 +121,7 @@ public class SelectedFlightUpdateController {
 
 		});
 		fromComboBox.setValue(airports.get(0));
-		
-		
+
 		whereComboBox.setItems(FXCollections.observableArrayList(airports));
 		whereComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Airport>() {
 
@@ -128,7 +130,6 @@ public class SelectedFlightUpdateController {
 				selectedAirportWhere.setValue(newValue);
 				flightFxModel.setWhere(newValue);
 				System.out.println(selectedAirportFrom);
-
 
 			}
 
@@ -148,20 +149,17 @@ public class SelectedFlightUpdateController {
 
 		});
 		whereComboBox.setValue(airports.get(0));
-		
-		// Idk what next
+
 		fromComboBox.valueProperty().addListener(new ChangeListener<Airport>() {
 
 			@Override
 			public void changed(ObservableValue<? extends Airport> observable, Airport oldValue, Airport newValue) {
-				
-				
+
 			}
 		});
 
 		businessRadioButton.selectedProperty().bindBidirectional(flightFxModel.businessProperty());
 		companyNameTextField.textProperty().bindBidirectional(flightFxModel.companyNameProperty());
-		businessRadioButton.selectedProperty().bindBidirectional(flightFxModel.businessProperty());
 		numberOfSeatsTextField.textProperty().bindBidirectional(flightFxModel.seatsProperty());
 		departureTextField.textProperty().bindBidirectional(flightFxModel.departureProperty(),
 				new StringConverter<LocalDateTime>() {
@@ -226,7 +224,7 @@ public class SelectedFlightUpdateController {
 		FlightDao flightDao = DaoFactory.INSTANCE.getFlightDao();
 		Flight savedFlight = flightDao.save(flightFxModel.getFlight());
 		Alert alert = new Alert(AlertType.INFORMATION);
-		alert.setContentText("Flight \n" +  flightFxModel.getFlight() +" \n EDITED SUCCESSFULLY!");
+		alert.setContentText("Flight \n" + flightFxModel.getFlight() + " \n EDITED SUCCESSFULLY!");
 		alert.showAndWait();
 		updateButton.getScene().getWindow().hide();
 	}

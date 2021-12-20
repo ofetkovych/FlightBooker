@@ -56,6 +56,7 @@ public class FlightFxModel {
 		customers = FXCollections.observableArrayList();
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	public FlightFxModel(Flight flight) {
 		super();
 		this.id = flight.getId();
@@ -71,9 +72,6 @@ public class FlightFxModel {
 		this.customers = FXCollections.observableArrayList(customers);
 		
 	}
-	
-	
-	
 
 	public Long getId() {
 		return id;
@@ -204,7 +202,7 @@ public class FlightFxModel {
 		String number = getSeats();
 		Integer seats = Integer.parseInt(number);
 		Flight flight = new Flight(id, getDateOfFlight(), idFrom, idWhere, getCompanyName(),
-				getBusiness() ? "Economy" : "Business", seats, getDeparture(), getArrival(), getCustomers());
+				getBusiness() ? "Business": "Economy", seats, getDeparture(), getArrival(), getCustomers());
 		System.out.println(flight);
 		return flight;
 	}
