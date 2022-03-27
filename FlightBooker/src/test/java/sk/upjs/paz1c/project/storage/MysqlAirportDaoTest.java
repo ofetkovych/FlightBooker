@@ -41,38 +41,26 @@ class MysqlAirportDaoTest {
 		Set<String> countries = airportDao.getAllCountries();
 		assertNotNull(countries);
 		assertTrue(countries.size() > 0);
-		//System.out.println(countries);
 	}
 
 	@Test
 	void testGetCityByCountry() {
 		Set<String> countries = airportDao.getAllCountries();
-		// System.out.println(countries);
 		String countr = "Slovakia";
-		Set<String> cities = airportDao.getCityByCountry(countr); // alebo
-																	// airportDao.getCityByCountry(countries.iterator().next();
+		Set<String> cities = airportDao.getCityByCountry(countr); // alebo																	// airportDao.getCityByCountry(countries.iterator().next();
 		assertNotNull(cities);
 		assertTrue(cities.size() > 0);
-		// System.out.println(cities);
 	}
 
 	@Test
 	void testGetByCity() {
-		String city = "Trnava";
-//		Set<String> countries = airportDao.getAllCountries();
-//		Set<String> cities = airportDao.getCityByCountry(countries.iterator().next());
-//		System.out.println(cities);
+		String city = "London";
 		Set<String> airports = airportDao.getByCity(city);
 		System.out.println(airports);
 		assertNotNull(airports);
 		assertTrue(airports.size() > 0);
 		System.out.println(airports);
 	}
-	
-//	@Test
-//	void testGetByCity() {
-//		System.out.println(airportDao.getByCity("London"));
-//	}
 
 	@Test
 	void testGetById() {
@@ -113,7 +101,6 @@ class MysqlAirportDaoTest {
 			}
 		});
 
-
 	}
 	@Test
 	void testDelete() {
@@ -125,12 +112,6 @@ class MysqlAirportDaoTest {
 			@Override
 			public void execute() throws Throwable {
 				airportDao.getById(saved.getId());
-			}
-		});
-		assertThrows(EntityUndeleteableException.class, new Executable() {
-			@Override
-			public void execute() throws Throwable {
-				airportDao.delete(1L);
 			}
 		});
 	}
@@ -151,14 +132,12 @@ class MysqlAirportDaoTest {
 		for (Airport airport : all) {
 			if (airport.getId().equals(savedNewAirport.getId())) {
 				found = true;
-				assertEquals("Tester", airport.getCountry());
-				assertEquals("Of delete", airport.getCity());
-				assertEquals("to", airport.getAirportName());
-				assertEquals("DEL", airport.getAirportAcronym());
+				assertEquals(savedNewAirport, airport);
 				break;
 			}
 		}
 		assertTrue(found);
 		airportDao.delete(savedNewAirport.getId());
 	}
+
 }

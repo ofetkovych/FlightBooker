@@ -18,6 +18,12 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
+import sk.upjs.paz1c.project.storage.Airport;
+import sk.upjs.paz1c.project.storage.Customer;
+import sk.upjs.paz1c.project.storage.DaoFactory;
+import sk.upjs.paz1c.project.storage.EntityNotFoundException;
+import sk.upjs.paz1c.project.storage.Flight;
+
 public class MysqlFlightDao implements FlightDao {
 
 	private JdbcTemplate jdbcTemplate;
@@ -78,11 +84,6 @@ public class MysqlFlightDao implements FlightDao {
 		if (flight == null) {
 			throw new NullPointerException("Flight cannot be null");
 		}
-		for (Customer customer : flight.getCustomers()) {
-			if (customer.getId() == null) {
-				throw new NullPointerException("Customer has no ID: " + customer);
-			}
-		}
 
 		if (flight.getId() == null) { // INSERT
 			SimpleJdbcInsert insert = new SimpleJdbcInsert(jdbcTemplate);
@@ -104,7 +105,11 @@ public class MysqlFlightDao implements FlightDao {
 			try {
 				Long idinsert = insert.executeAndReturnKey(values).longValue();
 				flight.setId(idinsert);
-				// insertCustomers(flight.getCustomers(), idinsert);
+				insertCustomers(flight.getCustomers(), idinsert);
+				Flight i = new Flight(idinsert, flight.getDateOfFlight(), flight.getFrom(), flight.getWhere(),
+						flight.getCompanyName(), flight.getFlightClass(), flight.getNumberOfSeats(),
+						flight.getDeparture(), flight.getArrival(), flight.getCustomers());
+				i.setCustomers(flight.getCustomers());
 				return flight;
 			} catch (DataIntegrityViolationException e) {
 				throw new EntityNotFoundException(
@@ -123,15 +128,20 @@ public class MysqlFlightDao implements FlightDao {
 			jdbcTemplate.update("DELETE FROM flight_customer WHERE flight_id = ?", flight.getId());
 			List<Customer> customer = DaoFactory.INSTANCE.getCustomerDao().getByFlightId(flight.getId());
 			List<Customer> customersNotInFlight = new ArrayList<>();
+			if(flight.getCustomers() != null) {
 			for (int i = 0; i < flight.getCustomers().size(); i++) {
 				Customer temporaryCustomer = flight.getCustomers().get(i);
 				if (!customer.contains(temporaryCustomer)) {
 					customersNotInFlight.add(temporaryCustomer);
 				}
 			}
-			// insertCustomers(customersNotInFlight, flight.getId());
-			return flight;
-
+			}
+			insertCustomers(customersNotInFlight, flight.getId());
+			Flight i = new Flight(flight.getId(), flight.getDateOfFlight(), flight.getFrom(), flight.getWhere(),
+					flight.getCompanyName(), flight.getFlightClass(), flight.getNumberOfSeats(), flight.getDeparture(),
+					flight.getArrival());
+			i.setCustomers(flight.getCustomers());
+			return i;
 		}
 	}
 
@@ -241,7 +251,6 @@ public class MysqlFlightDao implements FlightDao {
 					+ "   join airport as a1 on airport_from = a1.id\r\n"
 					+ "   join airport as a2 on airport_where = a2.id\r\n"
 					+ "   where a1.airport_name = ? or a2.airport_name = ?";
-			System.out.println("SQL");
 			return jdbcTemplate.query(sql1, new ResultSetExtractor<List<Flight>>() {
 
 				@Override
@@ -260,21 +269,14 @@ public class MysqlFlightDao implements FlightDao {
 						LocalDateTime arrival = rs.getTimestamp("arrival").toLocalDateTime();
 						Airport a = DaoFactory.INSTANCE.getAirportDao().getById(from1);
 						Airport a2 = DaoFactory.INSTANCE.getAirportDao().getById(where1);
-						System.out.println("EXTRACTOR");
 						if (a.getAirportName().equals(from)) {
 							from_list.add(new Flight(id, dateOfFlight, from1, where1, companyName, flightClass,
 									numberOfSeats, departure, arrival));
-							System.out.println("PRVE IF");
-							System.out.println(from_list);
-							System.out.println();
 						}
 
 						if (a2.getAirportName().equals(where)) {
 							where_list.add(new Flight(id, dateOfFlight, from1, where1, companyName, flightClass,
 									numberOfSeats, departure, arrival));
-							System.out.println("DRUHY IF");
-							System.out.println(where_list);
-							System.out.println();
 						}
 					}
 					for (int i = 0; i < from_list.size(); i++) {
@@ -284,7 +286,6 @@ public class MysqlFlightDao implements FlightDao {
 									&& from_list.get(i).getArrival().isAfter(LocalDateTime.now())) {
 								gh.add(from_list.get(i));
 								gh.add(where_list.get(j));
-								System.out.println("=");
 							}
 						}
 					}

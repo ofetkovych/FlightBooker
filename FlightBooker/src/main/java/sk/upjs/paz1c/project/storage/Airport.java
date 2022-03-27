@@ -29,6 +29,10 @@ public class Airport {
 	private String city;
 	private String airportName;
 	private String airportAcronym;
+	
+	public Airport() {
+		
+	}
 
 	public Airport(Long id, String country, String city, String airportName, String airportAcronym) {
 		super();

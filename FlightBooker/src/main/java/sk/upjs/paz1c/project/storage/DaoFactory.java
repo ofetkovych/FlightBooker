@@ -41,18 +41,18 @@ public enum DaoFactory {
 	
 
 	private JdbcTemplate getJdbcTemplate() {
-		if (jdbcTemplate == null) {
-			MysqlDataSource dataSource = new MysqlDataSource();
-			dataSource.setUser("root");
-			dataSource.setPassword("halflife");
-			if (testing == false) {
-				dataSource.setUrl("jdbc:mysql://localhost:3306/Flightbooker?" + "serverTimezone=Europe/Bratislava");
-			} else {
-				dataSource
-						.setUrl("jdbc:mysql://localhost:3306/Flightbooker_test?" + "serverTimezone=Europe/Bratislava");
-			}
-			jdbcTemplate = new JdbcTemplate(dataSource);
-		}
+		 if (jdbcTemplate == null) {
+	            MysqlDataSource dataSource = new MysqlDataSource();
+	            dataSource.setUser("paz1c");
+	            dataSource.setPassword("paz1c5555");
+	            if (testing == false) {
+					dataSource.setUrl("jdbc:mysql://localhost/mydb?serverTimezone=Europe/Bratislava");
+				} else {
+					dataSource
+							.setUrl("jdbc:mysql://localhost/mydb_test?serverTimezone=Europe/Bratislava");
+				}
+	            jdbcTemplate = new JdbcTemplate(dataSource);
+	        }
 		return jdbcTemplate;
 	}
 }
